@@ -11,8 +11,8 @@ import HiveDB from "./hiveDB";
 //     return schema;
 // };
 // CreateSchema({ adam: { type: "number", required: true } });
+const db = new HiveDB("newdb");
 
-const db = new HiveDB("new-db");
 await db.init();
 
 const userSchema = db.CreateSchema({
@@ -44,7 +44,10 @@ const postSchema = db.CreateSchema({
 
 //await col.delete({ name: "swwsssrr" });
 
+//db.createCollection("bad name!!!", postSchema);
+
 const postCol = await db.createCollection("posts", postSchema);
+db.createCollection("posts", postSchema);
 
 const userCol = await db.createCollection("users", userSchema);
 
@@ -54,11 +57,16 @@ const author = await userCol.create({
     email: "adam66@gmail.com",
 });
 
-await postCol.create({
-    title: "Adam Title",
-    content: "This a content",
-    subtitle: "Adam subtitle",
-    authorId: author._id,
-});
+let existingPost = await postCol.findOne({ title: "Adam Title" });
 
-await postCol.delete({ _id: "" });
+if (!existingPost)
+    existingPost = await postCol.create({
+        title: "Adam Title",
+        content: "This a content",
+        subtitle: "Adam subtitle",
+        authorId: author._id,
+    });
+
+const foundPost = await postCol.findById(existingPost._id);
+
+console.log(foundPost);

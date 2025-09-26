@@ -1,36 +1,40 @@
 [
-  {
-    "name": "users",
-    "schema": {
-      "name": {
-        "type": "string",
-        "required": true
-      },
-      "password": {
-        "type": "string",
-        "required": true
-      },
-      "food": {
-        "type": "number"
-      },
-      "email": {
-        "type": "string"
-      }
+    {
+        "name": "users",
+        "schema": {
+            "name": {
+                "type": "string",
+                "required": true
+            },
+            "password": {
+                "type": "string",
+                "required": true
+            },
+            "food": {
+                "type": "number"
+            },
+            "email": {
+                "type": "string"
+            }
+        }
+    },
+    {
+        "name": "posts",
+        "schema": {
+            "title": {
+                "type": "string",
+                "required": true
+            },
+            "subtitle": {
+                "type": "string"
+            },
+            "content": {
+                "type": "string"
+            },
+            "authorId": {
+                "type": "string",
+                "required": true
+            }
+        }
     }
-  },
-  {
-    "name": "posts",
-    "schema": {
-      "title": {
-        "type": "string",
-        "required": true
-      },
-      "subtitle": {
-        "type": "string"
-      },
-      "content": {
-        "type": "string"
-      }
-    }
-  }
 ]

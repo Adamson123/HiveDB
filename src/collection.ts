@@ -3,6 +3,8 @@ import HiveDB from "./hiveDB";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { checkFolderOrFileExist } from "./utils";
+import { HiveError, HiveErrorCode } from "./errors";
+import { validateName } from "./global";
 
 type Otherfields = {
     required?: boolean;
@@ -35,7 +37,7 @@ type FieldType<T> = {
         : never;
 };
 
-// Stored document: optional fields may be absent
+// Stored document
 type Doc<S> = { _id: string } & {
     [K in keyof S]: FieldType<S[K]>;
 };
@@ -48,10 +50,20 @@ export default class Collection<S extends Schema> {
     documents: Doc<S>[] = [];
 
     constructor(name: string, schema: S, database: HiveDB) {
+        this.validateCollectionName(name);
         this.name = name;
         this.schema = schema;
         this.#database = database;
         this.filePath = path.join(database.folderPath, name + ".json");
+    }
+
+    private validateCollectionName(name: string) {
+        if (validateName(name)) {
+            throw new HiveError(
+                HiveErrorCode.ERR_INVALID_COLLECTION_NAME,
+                `Collection name '${name}' is invalid.`
+            );
+        }
     }
 
     async init() {
@@ -129,5 +141,12 @@ export default class Collection<S extends Schema> {
         return this.documents.filter((doc) =>
             keys.every((key) => (doc as any)[key] === (query as any)[key])
         );
+    }
+
+    async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
+        const keys = Object.keys(query) as (keyof S)[];
+        return this.documents.find((doc) =>
+            keys.every((key) => (doc as any)[key] === (query as any)[key])
+        ) as Doc<S>;
     }
 }
