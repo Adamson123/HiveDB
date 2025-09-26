@@ -61,4 +61,4 @@ await postCol.create({
     authorId: author._id,
 });
 
-await postCol.find();
+await postCol.delete({ _id: "" });

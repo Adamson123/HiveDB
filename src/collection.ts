@@ -106,7 +106,7 @@ export default class Collection<S extends Schema> {
         await this.saveDocumentsToFile();
     }
 
-    async delete(query: Partial<{ [K in keyof S]: FieldType<S[K]> }>) {
+    async delete(query: Partial<Doc<S>>) {
         const keys = Object.keys(query) as (keyof S)[];
         if (keys.length === 0) {
             // delete all
@@ -124,9 +124,7 @@ export default class Collection<S extends Schema> {
         return this.documents.find((doc) => doc._id === _id);
     }
 
-    async find(
-        query: Partial<{ [K in keyof S]: FieldType<S[K]> }>
-    ): Promise<Doc<S>[]> {
+    async find(query: Partial<Doc<S>>): Promise<Doc<S>[]> {
         const keys = Object.keys(query) as (keyof S)[];
         return this.documents.filter((doc) =>
             keys.every((key) => (doc as any)[key] === (query as any)[key])
