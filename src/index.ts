@@ -60,3 +60,5 @@ await postCol.create({
     subtitle: "Adam subtitle",
     authorId: author._id,
 });
+
+await postCol.find();

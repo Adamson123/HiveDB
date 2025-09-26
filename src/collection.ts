@@ -36,8 +36,8 @@ type FieldType<T> = {
 };
 
 // Stored document: optional fields may be absent
-type Doc<S extends Schema> = { _id: string } & {
-    [K in keyof S]?: FieldType<S[K]>;
+type Doc<S> = { _id: string } & {
+    [K in keyof S]: FieldType<S[K]>;
 };
 
 export default class Collection<S extends Schema> {
