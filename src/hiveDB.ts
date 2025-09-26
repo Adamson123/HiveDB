@@ -99,4 +99,9 @@ export default class HiveDB {
         this.saveCollectionsInfoToFile();
         // console.log(collectionToDelete);
     }
+
+    //To provide type safety when defining schema
+    CreateSchema<S extends Schema>(schema: S) {
+        return schema;
+    }
 }

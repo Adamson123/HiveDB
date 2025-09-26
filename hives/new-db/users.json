@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "_id": "9ff88b7e-d62a-4e4c-8f91-1cd86797d24e",
+    "name": "Adam Ajibade",
+    "password": "12345",
+    "email": "adam66@gmail.com"
+  },
+  {
+    "_id": "be39b3f0-7788-4091-bf63-cc33e22a923e",
+    "name": "Adam Ajibade",
+    "password": "12345",
+    "email": "adam66@gmail.com"
+  },
+  {
+    "_id": "10acdbe8-5ce7-4ce1-93ad-5eda90caa67c",
+    "name": "Adam Ajibade",
+    "password": "12345",
+    "email": "adam66@gmail.com"
+  }
+]

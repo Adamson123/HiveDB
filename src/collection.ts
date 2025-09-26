@@ -4,31 +4,36 @@ import path from "path";
 import { v4 as uuid } from "uuid";
 import { checkFolderOrFileExist } from "./utils";
 
+type Otherfields = {
+    required?: boolean;
+};
+
 export type FieldSpec =
-    | { type: "string"; required?: boolean }
-    | { type: "number"; required?: boolean }
-    | { type: "boolean"; required?: boolean };
+    | ({ type: "string" } & Otherfields)
+    | ({ type: "number" } & Otherfields)
+    | ({ type: "boolean" } & Otherfields);
 
 export type Schema = Record<string, FieldSpec>;
 
-type FieldType<F> = F extends { type: "string" }
-    ? string
-    : F extends { type: "number" }
-    ? number
-    : F extends { type: "boolean" }
-    ? boolean
-    : never;
-
-type RequiredKeys<S extends Schema> = {
-    [K in keyof S]-?: S[K] extends { required: true } ? K : never;
-}[keyof S];
-
-type OptionalKeys<S extends Schema> = Exclude<keyof S, RequiredKeys<S>>;
-
-// Create input: required fields are required; optional fields are optional (no error when omitted)
-type CreateInput<S extends Schema> = {
-    [K in RequiredKeys<S>]: FieldType<S[K]>;
-} & { [K in OptionalKeys<S>]?: FieldType<S[K]> };
+type FieldType<T> = {
+    // required fields
+    [K in keyof T as T[K] extends { required: true }
+        ? K
+        : never]: T[K] extends { type: "string" }
+        ? string
+        : T[K] extends { type: "number" }
+        ? number
+        : never;
+} & {
+    // optional fields
+    [K in keyof T as T[K] extends { required: true }
+        ? never
+        : K]?: T[K] extends { type: "string" }
+        ? string
+        : T[K] extends { type: "number" }
+        ? number
+        : never;
+};
 
 // Stored document: optional fields may be absent
 type Doc<S extends Schema> = { _id: string } & {
@@ -89,7 +94,7 @@ export default class Collection<S extends Schema> {
         if (isFileExist) await fs.unlink(this.filePath);
     }
 
-    async create(document: CreateInput<S>): Promise<Doc<S>> {
+    async create(document: FieldType<S>): Promise<Doc<S>> {
         const newDocument: Doc<S> = { _id: uuid(), ...(document as any) };
         this.documents.push(newDocument);
         await this.saveDocumentsToFile();

@@ -1,16 +1,38 @@
 import HiveDB from "./hiveDB";
 
+// type SchemaComp<T> = {
+//     [K in keyof T]: {
+//         type: "string" | "number" | "boolean";
+//         required?: boolean;
+//     };
+// };
+
+// const CreateSchema = <S>(schema: SchemaComp<S>) => {
+//     return schema;
+// };
+// CreateSchema({ adam: { type: "number", required: true } });
+
 const db = new HiveDB("new-db");
 await db.init();
 
-const schema = {
+const userSchema = db.CreateSchema({
     name: { type: "string", required: true },
     password: { type: "string", required: true },
-    food: { type: "number" },
+    bio: { type: "string" },
     email: {
         type: "string",
     },
-} as const;
+});
+
+const postSchema = db.CreateSchema({
+    title: { type: "string", required: true },
+    subtitle: { type: "string" },
+    content: { type: "string" },
+    authorId: {
+        type: "string",
+        required: true,
+    },
+});
 
 //const col = await db.createCollection("coll", schema);
 
@@ -22,25 +44,19 @@ const schema = {
 
 //await col.delete({ name: "swwsssrr" });
 
-const article = await db.createCollection("posts", {
-    title: { type: "string", required: true },
-    subtitle: { type: "string" },
-    content: { type: "string" },
+const postCol = await db.createCollection("posts", postSchema);
+
+const userCol = await db.createCollection("users", userSchema);
+
+const author = await userCol.create({
+    name: "Adam Ajibade",
+    password: "12345",
+    email: "adam66@gmail.com",
 });
 
-await article.create({
+await postCol.create({
     title: "Adam Title",
     content: "This a content",
     subtitle: "Adam subtitle",
+    authorId: author._id,
 });
-
-const user = await db.createCollection("users", schema);
-
-await db.deleteCollection("posts");
-await db.createCollection("posts", {
-    title: { type: "string", required: true },
-    subtitle: { type: "string" },
-    content: { type: "string" },
-});
-
-//console.log(user);
