@@ -34,26 +34,15 @@ const postSchema = db.CreateSchema({
     },
 });
 
-//const col = await db.createCollection("coll", schema);
-
-// IntelliSense now suggests "name" (string, required) and "food" (number, optional)
-// const created = await col.create({ name: "swwsssrr", password: "!@#334444" });
-
-// // Typed query completions:
-// const user = await col.find({ name: "swwsssrr" });
-
-//await col.delete({ name: "swwsssrr" });
-
-//db.createCollection("bad name!!!", postSchema);
-
 const postCol = await db.createCollection("posts", postSchema);
-db.createCollection("posts", postSchema);
+
+const posts = db.createCollection("posts", postSchema);
 
 const userCol = await db.createCollection("users", userSchema);
 
 const author = await userCol.create({
     name: "Adam Ajibade",
-    password: "12345",
+    password: "",
     email: "adam66@gmail.com",
 });
 

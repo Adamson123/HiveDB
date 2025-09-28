@@ -1,8 +1,9 @@
 import fs from "fs/promises";
+import fsSync from "fs";
 import HiveDB from "./hiveDB";
 import path from "path";
 import { v4 as uuid } from "uuid";
-import { checkFolderOrFileExist } from "./utils";
+import { checkFolderOrFileExist, handleFileIO } from "./utils";
 import { HiveError, HiveErrorCode } from "./errors";
 import { validateName } from "./global";
 
@@ -48,6 +49,7 @@ export default class Collection<S extends Schema> {
     filePath: string;
     schema: S;
     documents: Doc<S>[] = [];
+    isInit: boolean = false;
 
     constructor(name: string, schema: S, database: HiveDB) {
         this.validateCollectionName(name);
@@ -66,47 +68,136 @@ export default class Collection<S extends Schema> {
         }
     }
 
+    //Checks if all required if field are not empty
+
+    async createCollectionFile() {
+        await handleFileIO(
+            `Error creating collection "${this.name}"`,
+            async () => {
+                return await fs.readFile(this.filePath, "utf8");
+            }
+        );
+    }
+
     async init() {
+        if (this.isInit) return;
         const isFileExist = await checkFolderOrFileExist(this.filePath); //true
         //If file does not exist
         if (!isFileExist) {
-            await fs.writeFile(this.filePath, "[]", "utf8");
+            await this.createCollectionFile();
+
             this.documents = [];
             return true; // Just creating collection file
         }
         this.documents = await this.getDocumentsFromFile();
+        this.isInit = true;
     }
 
+    // initSync() {
+    //     const exists = fsSync.existsSync(this.filePath);
+    //     if (!exists) {
+    //         fsSync.writeFileSync(this.filePath, "[]", "utf8");
+    //         this.documents = [];
+    //         return true; // Just created
+    //     }
+    //     try {
+    //         const data = fsSync.readFileSync(this.filePath, "utf8").trim();
+    //         if (!data) {
+    //             fsSync.writeFileSync(this.filePath, "[]", "utf8");
+    //             this.documents = [];
+    //             return false;
+    //         }
+    //         this.documents = JSON.parse(data) as Doc<S>[];
+    //     } catch {
+    //         fsSync.writeFileSync(this.filePath, "[]", "utf8");
+    //         this.documents = [];
+    //     }
+    //     return false;
+    // }
+
+    //TODO: Remove creating collection file when it does not exist
     private async getDocumentsFromFile(): Promise<Doc<S>[]> {
-        const data = await fs.readFile(this.filePath, "utf8");
+        const data = await handleFileIO(
+            `Error reading collection "${this.name}"`,
+            async () => {
+                return await fs.readFile(this.filePath, "utf8");
+            }
+        );
+
         const trimmed = data.trim();
+
         if (!trimmed) {
-            await fs.writeFile(this.filePath, "[]", "utf8");
+            await this.createCollectionFile();
             return [];
         }
         try {
             return JSON.parse(trimmed) as Doc<S>[];
         } catch {
-            await fs.writeFile(this.filePath, "[]", "utf8");
+            await this.createCollectionFile();
             return [];
         }
     }
 
     private async saveDocumentsToFile() {
-        try {
-            const documents = JSON.stringify(this.documents, null, 2);
-            await fs.writeFile(this.filePath, documents);
-        } catch (error) {
-            console.log("Error writing to file", error);
-        }
+        const documents = JSON.stringify(this.documents, null, 2);
+        await handleFileIO(
+            `Error saving document to collection "${this.name}"`,
+            async () => {
+                fs.writeFile(this.filePath, documents);
+            }
+        );
     }
 
     async deleteCollection() {
         const isFileExist = await checkFolderOrFileExist(this.filePath);
-        if (isFileExist) await fs.unlink(this.filePath);
+        if (isFileExist)
+            await handleFileIO(
+                `Error deleting collection "${this.name}"`,
+                async () => {
+                    await fs.unlink(this.filePath);
+                }
+            );
+    }
+
+    //TODO: Will be Extended for data types that will be added to the schema in the future
+    private validateFieldTypes = (document: FieldType<S>) => {
+        const keys = Object.keys(document);
+
+        for (const key of keys) {
+            const fieldTypeInDoc = document[key];
+            const fieldTypeInSchema = this.schema[key].type;
+
+            if (typeof fieldTypeInDoc !== fieldTypeInSchema) {
+                throw new HiveError(
+                    HiveErrorCode.ERR_INVALID_FIELD_TYPE,
+                    `Invalid type for field "${key}". Expect ${fieldTypeInSchema}, got ${fieldTypeInDoc}`
+                );
+            }
+        }
+    };
+
+    private validateRequiredFields(document: FieldType<S>) {
+        const requiredSchemaKeys = Object.keys(this.schema).filter(
+            (key) => this.schema[key].required
+        );
+
+        for (const key of requiredSchemaKeys) {
+            //If document doesn't have this required key
+            if (!Object.keys(document).includes(key))
+                throw new HiveError(
+                    //TODO: add new Error enum for this
+                    HiveErrorCode.ERR_VALIDATION_FAILED,
+                    `The field "${key}" is missing or empty`
+                );
+        }
     }
 
     async create(document: FieldType<S>): Promise<Doc<S>> {
+        await this.init();
+
+        this.validateRequiredFields(document);
+        this.validateFieldTypes(document);
+
         const newDocument: Doc<S> = { _id: uuid(), ...(document as any) };
         this.documents.push(newDocument);
         await this.saveDocumentsToFile();
@@ -114,11 +205,15 @@ export default class Collection<S extends Schema> {
     }
 
     async deleteById(_id: string) {
+        await this.init();
+
         this.documents = this.documents.filter((doc) => doc._id !== _id);
         await this.saveDocumentsToFile();
     }
 
     async delete(query: Partial<Doc<S>>) {
+        await this.init();
+
         const keys = Object.keys(query) as (keyof S)[];
         if (keys.length === 0) {
             // delete all
@@ -129,14 +224,19 @@ export default class Collection<S extends Schema> {
                 keys.some((key) => (doc as any)[key] !== (query as any)[key])
             );
         }
+
         await this.saveDocumentsToFile();
     }
 
     async findById(_id: string): Promise<Doc<S> | undefined> {
+        await this.init();
+
         return this.documents.find((doc) => doc._id === _id);
     }
 
     async find(query: Partial<Doc<S>>): Promise<Doc<S>[]> {
+        await this.init();
+
         const keys = Object.keys(query) as (keyof S)[];
         return this.documents.filter((doc) =>
             keys.every((key) => (doc as any)[key] === (query as any)[key])
@@ -144,6 +244,8 @@ export default class Collection<S extends Schema> {
     }
 
     async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
+        await this.init();
+
         const keys = Object.keys(query) as (keyof S)[];
         return this.documents.find((doc) =>
             keys.every((key) => (doc as any)[key] === (query as any)[key])
