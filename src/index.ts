@@ -1,16 +1,5 @@
-import HiveDB from "./hiveDB";
+import HiveDB from "./hiveDB/hiveDB";
 
-// type SchemaComp<T> = {
-//     [K in keyof T]: {
-//         type: "string" | "number" | "boolean";
-//         required?: boolean;
-//     };
-// };
-
-// const CreateSchema = <S>(schema: SchemaComp<S>) => {
-//     return schema;
-// };
-// CreateSchema({ adam: { type: "number", required: true } });
 const db = new HiveDB("newdb");
 
 await db.init();
@@ -36,7 +25,7 @@ const postSchema = db.CreateSchema({
 
 const postCol = await db.createCollection("posts", postSchema);
 
-const posts = db.createCollection("posts", postSchema);
+//const posts = db.createCollection("posts", postSchema);
 
 const userCol = await db.createCollection("users", userSchema);
 

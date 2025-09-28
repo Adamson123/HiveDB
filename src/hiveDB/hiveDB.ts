@@ -1,34 +1,28 @@
 import path from "path";
-import { allDatabesesFolder, validateName } from "./global";
-import { checkFolderOrFileExist, handleFileIO, handleFolderIO } from "./utils";
+import { allDatabesesFolder } from "../global";
+import { checkFolderOrFileExist } from "../utils/exist";
 import fs from "fs/promises";
-import Collection, { Schema } from "./collection";
-import { HiveError, HiveErrorCode } from "./errors";
+import Collection, { Schema } from "../collection/collection";
+import { HiveError, HiveErrorCode } from "../errors";
+import { handleFolderIO } from "../utils/io";
+import HiveDB_Helper from "./hiveDB.helper";
 
 export default class HiveDB {
     name: string;
     folderPath: string;
-    private hiveDB_data_folder: string = "./data_folder";
-    private collectionsInfoPath: string = path.join(
+    hiveDB_data_folder: string = "./data_folder";
+    collectionsInfoPath: string = path.join(
         this.hiveDB_data_folder,
         "collectionsData.json"
     );
     collections: Collection<any>[] = [];
     processCollectionsName: Set<string> = new Set();
+    helper: HiveDB_Helper = new HiveDB_Helper(this);
 
     constructor(name: string) {
-        this.validateDatabaseName(name);
+        this.helper.validateDatabaseName(name);
         this.name = name;
         this.folderPath = path.join(allDatabesesFolder, this.name);
-    }
-
-    private validateDatabaseName(name: string) {
-        if (validateName(name)) {
-            throw new HiveError(
-                HiveErrorCode.ERR_INVALID_DATABASE_NAME,
-                `Database name '${name}' is invalid.`
-            );
-        }
     }
 
     async deleteDatabase() {
@@ -55,63 +49,13 @@ export default class HiveDB {
                 }
             );
         }
-        const collectionsInfo = await this.getCollectionsInfoFromFile();
+        const collectionsInfo = await this.helper.getCollectionsInfoFromFile();
 
         if (collectionsInfo && collectionsInfo.length) {
             this.collections = collectionsInfo.map(
                 (col) => new Collection(col.name, col.schema, this)
             );
         }
-    }
-
-    async saveCollectionsInfoToFile() {
-        const isFolderExist = await checkFolderOrFileExist(
-            this.hiveDB_data_folder
-        );
-        if (!isFolderExist)
-            await handleFolderIO(
-                `Error creating hiveDB data folder during "${this.name}" database operation`,
-                async () => {
-                    await fs.mkdir(this.hiveDB_data_folder);
-                }
-            );
-        //Save collections info to a json file
-        const collectionsInfo = JSON.stringify(
-            this.collections?.map((col) => ({
-                name: col.name,
-                schema: col.schema,
-            })) || "[]",
-            null,
-            2
-        );
-        await handleFileIO(
-            `Error saving collections info during "${this.name}" database operation`,
-            async () => {
-                fs.writeFile(this.collectionsInfoPath, collectionsInfo);
-            }
-        );
-    }
-
-    async getCollectionsInfoFromFile() {
-        const isCollectionsInfoFileExist = await checkFolderOrFileExist(
-            this.collectionsInfoPath
-        );
-
-        if (isCollectionsInfoFileExist) {
-            const data = await handleFileIO(
-                `Error getting collections info during "${this.name}" database operation`,
-                async () => {
-                    return fs.readFile(this.collectionsInfoPath, "utf8");
-                }
-            );
-            try {
-                return JSON.parse(data);
-            } catch {
-                return [];
-            }
-        }
-
-        return [];
     }
 
     async createCollection<S extends Schema>(name: string, schema: S) {
@@ -130,7 +74,7 @@ export default class HiveDB {
         //If just creating collection file
         if (justCreatingCollection) {
             this.collections.push(newCollection);
-            await this.saveCollectionsInfoToFile();
+            await this.helper.saveCollectionsInfoToFile();
         }
         this.processCollectionsName.add(name);
 
@@ -143,7 +87,7 @@ export default class HiveDB {
         );
         await collectionToDelete?.deleteCollection();
         this.collections = this.collections?.filter((col) => col.name !== name);
-        this.saveCollectionsInfoToFile();
+        this.helper.saveCollectionsInfoToFile();
         // console.log(collectionToDelete);
     }
 
