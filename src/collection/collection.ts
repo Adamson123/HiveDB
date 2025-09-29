@@ -68,7 +68,7 @@ export default class Collection<S extends Schema> {
             await this.helper.createCollectionFile();
 
             this.documents = [];
-            return true; // Just creating collection file
+            // return true; // Just creating collection file
         }
         this.documents = await this.helper.getDocumentsFromFile();
         this.isInit = true;

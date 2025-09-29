@@ -12,7 +12,9 @@ export default class HiveDB {
     folderPath: string;
     hiveDB_data_folder: string = "./data_folder";
     collectionsInfoPath: string;
+    // All collections in a database
     collections: Collection<any>[] = [];
+    // To avoid creating collection twice in a process
     processCollectionsName: Set<string> = new Set();
     helper: HiveDB_Helper = new HiveDB_Helper(this);
 
@@ -70,10 +72,13 @@ export default class HiveDB {
         }
 
         const newCollection = new Collection<S>(name, schema, this);
-        const justCreatingCollection = await newCollection.init();
+        await newCollection.init();
 
-        //If just creating collection file
-        if (justCreatingCollection) {
+        //Cheecking if collection already exist
+        const isAlreadyExistInCollection = this.collections.find(
+            (col) => col.name === name
+        );
+        if (!isAlreadyExistInCollection) {
             this.collections.push(newCollection);
             await this.helper.saveCollectionsInfoToFile();
         }

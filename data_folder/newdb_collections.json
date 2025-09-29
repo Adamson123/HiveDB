@@ -1,0 +1,40 @@
+[
+  {
+    "name": "posts",
+    "schema": {
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "subtitle": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      },
+      "authorId": {
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  {
+    "name": "users",
+    "schema": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "password": {
+        "type": "string",
+        "required": true
+      },
+      "bio": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+      }
+    }
+  }
+]
