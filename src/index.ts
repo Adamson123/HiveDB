@@ -2,11 +2,11 @@ import HiveDB from "./hiveDB";
 
 const db = HiveDB.createDatabase("newdb");
 const db2 = HiveDB.createDatabase("newdb2");
-
-await db.init();
-await db2.init();
+const db3 = HiveDB.createDatabase("newdb3");
 
 //db
+await db.init();
+
 const userSchema = db.CreateSchema({
     name: { type: "string", required: true },
     password: { type: "string", required: true },
@@ -51,6 +51,8 @@ const foundPost = await postCol.findById(existingPost._id);
 console.log(foundPost);
 
 //db2
+await db2.init();
+
 const productSchema = db2.CreateSchema({
     name: { type: "string", required: true },
     price: { type: "number", required: true },
@@ -66,3 +68,16 @@ const product = await productCol.create({
 });
 
 console.log(product);
+
+//db3
+await db3.init();
+
+const categorySchema = db3.CreateSchema({
+    name: { type: "string", required: true },
+    description: { type: "string" },
+});
+const categoryCol = await db3.createCollection("categories", categorySchema);
+//TODO: Fix deleteCollection not deleting the collection file
+await db3.deleteCollection("categories");
+const category = await categoryCol.create({ name: "Electronics" });
+console.log(category);

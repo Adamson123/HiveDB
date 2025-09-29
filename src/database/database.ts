@@ -99,6 +99,7 @@ export default class Database {
         const collectionToDelete = this.collections?.find(
             (col) => col.name === name
         );
+
         await collectionToDelete?.deleteCollection();
         this.collections = this.collections?.filter((col) => col.name !== name);
         this.helper.saveCollectionsInfoToFile();

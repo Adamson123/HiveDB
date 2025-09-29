@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import fsSync from "fs";
 import Database from "../Database/Database";
 import path from "path";
 import { v4 as uuid } from "uuid";
@@ -82,13 +83,15 @@ export default class Collection<S extends Schema> {
             await handleFileIO(
                 `Error deleting collection "${this.name}"`,
                 async () => {
+                    //console.log("Deleting collection file:", this.filePath);
                     await fs.unlink(this.filePath);
+                    this.documents = [];
                 }
             );
     }
 
     async create(document: FieldType<S>): Promise<Doc<S>> {
-        await this.init();
+        //  await this.init();
 
         this.helper.validateRequiredFields(document);
         this.helper.validateFieldTypes(document);
@@ -100,14 +103,14 @@ export default class Collection<S extends Schema> {
     }
 
     async deleteById(_id: string) {
-        await this.init();
+        // await this.init();
 
         this.documents = this.documents.filter((doc) => doc._id !== _id);
         await this.helper.saveDocumentsToFile();
     }
 
     async delete(query: Partial<Doc<S>>) {
-        await this.init();
+        //  await this.init();
 
         const keys = Object.keys(query) as (keyof S)[];
         if (keys.length === 0) {
@@ -124,13 +127,13 @@ export default class Collection<S extends Schema> {
     }
 
     async findById(_id: string): Promise<Doc<S> | undefined> {
-        await this.init();
+        // await this.init();
 
         return this.documents.find((doc) => doc._id === _id);
     }
 
     async find(query: Partial<Doc<S>>): Promise<Doc<S>[]> {
-        await this.init();
+        //  await this.init();
 
         const keys = Object.keys(query) as (keyof S)[];
         return this.documents.filter((doc) =>
@@ -139,7 +142,7 @@ export default class Collection<S extends Schema> {
     }
 
     async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
-        await this.init();
+        //   await this.init();
 
         const keys = Object.keys(query) as (keyof S)[];
         return this.documents.find((doc) =>

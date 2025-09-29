@@ -30,14 +30,17 @@ export default class CollectionHelper<S extends Schema> {
 
         const trimmed = data.trim();
 
+        // If file is empty, return empty array
         if (!trimmed) {
             await this.createCollectionFile();
             return [];
         }
+
+        // Try to parse JSON, if fails, return empty array
         try {
             return JSON.parse(trimmed) as Doc<S>[];
         } catch {
-            await this.createCollectionFile();
+            //await this.createCollectionFile();
             return [];
         }
     }
