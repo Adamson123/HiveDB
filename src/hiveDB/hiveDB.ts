@@ -11,10 +11,7 @@ export default class HiveDB {
     name: string;
     folderPath: string;
     hiveDB_data_folder: string = "./data_folder";
-    collectionsInfoPath: string = path.join(
-        this.hiveDB_data_folder,
-        "collectionsData.json"
-    );
+    collectionsInfoPath: string;
     collections: Collection<any>[] = [];
     processCollectionsName: Set<string> = new Set();
     helper: HiveDB_Helper = new HiveDB_Helper(this);
@@ -22,6 +19,10 @@ export default class HiveDB {
     constructor(name: string) {
         this.helper.validateDatabaseName(name);
         this.name = name;
+        this.collectionsInfoPath = path.join(
+            this.hiveDB_data_folder,
+            this.name + "_collections.json"
+        );
         this.folderPath = path.join(allDatabesesFolder, this.name);
     }
 
