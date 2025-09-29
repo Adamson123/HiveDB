@@ -25,6 +25,8 @@ export type FieldType<T> = {
         ? string
         : T[K] extends { type: "number" }
         ? number
+        : T[K] extends { type: "boolean" }
+        ? boolean
         : never;
 } & {
     // optional fields
@@ -34,6 +36,8 @@ export type FieldType<T> = {
         ? string
         : T[K] extends { type: "number" }
         ? number
+        : T[K] extends { type: "boolean" }
+        ? boolean
         : never;
 };
 

@@ -1,9 +1,10 @@
 import Database from "./Database/Database";
 import fsSync from "fs";
 import fs from "fs/promises";
-import { handleFileIO } from "./utils/io";
+import { handleFileIO, handleFolderIO } from "./utils/io";
 import path from "path";
 import { HiveError, HiveErrorCode } from "./errors";
+import { checkFolderOrFileExistSync } from "./utils/exist";
 
 const HiveDB = {
     databases: [] as Database[],
@@ -30,6 +31,20 @@ const HiveDB = {
     },
 
     loadDatabasesInfoFromFile() {
+        const isFolderExist = checkFolderOrFileExistSync(
+            HiveDB.hiveDB_data_folder
+        );
+        if (!isFolderExist)
+            handleFolderIO(
+                `Error creating hiveDB data folder during`,
+                async () => {
+                    fsSync.mkdirSync(HiveDB.hiveDB_data_folder);
+                    fsSync.mkdirSync(
+                        path.join(HiveDB.hiveDB_data_folder, "collections")
+                    );
+                }
+            );
+
         if (fsSync.existsSync(this.databaseInfoPath)) {
             const data = fsSync.readFileSync(this.databaseInfoPath, "utf8");
             try {

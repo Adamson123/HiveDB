@@ -15,7 +15,7 @@ export default class CollectionHelper<S extends Schema> {
         await handleFileIO(
             `Error creating collection "${this.collection.name}"`,
             async () => {
-                return await fs.readFile(this.collection.filePath, "utf8");
+                return await fs.writeFile(this.collection.filePath, "utf8");
             }
         );
     }

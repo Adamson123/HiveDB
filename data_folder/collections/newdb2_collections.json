@@ -1,0 +1,22 @@
+[
+  {
+    "name": "products",
+    "schema": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "price": {
+        "type": "number",
+        "required": true
+      },
+      "description": {
+        "type": "string"
+      },
+      "inStock": {
+        "type": "boolean",
+        "required": true
+      }
+    }
+  }
+]

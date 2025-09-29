@@ -11,7 +11,7 @@ import HiveDB from "../hiveDB";
 export default class Database {
     name: string;
     folderPath: string;
-    hiveDB: typeof HiveDB;
+    // hiveDB: typeof HiveDB;
     // hiveDB_data_folder: string = "./data_folder";
     collectionsInfoPath: string;
     // All collections in a database
@@ -23,9 +23,9 @@ export default class Database {
     constructor(name: string) {
         this.helper.validateDatabaseName(name);
         this.name = name;
-        this.hiveDB = HiveDB;
         this.collectionsInfoPath = path.join(
-            this.hiveDB.hiveDB_data_folder,
+            HiveDB.hiveDB_data_folder,
+            "collections",
             this.name + "_collections.json"
         );
         this.folderPath = path.join(allDatabesesFolder, this.name);
@@ -66,7 +66,7 @@ export default class Database {
             );
         }
 
-        await this.hiveDB.saveDatabasesInfoToFile(this.name);
+        await HiveDB.saveDatabasesInfoToFile(this.name);
     }
 
     async createCollection<S extends Schema>(name: string, schema: S) {

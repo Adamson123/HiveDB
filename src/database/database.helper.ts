@@ -4,6 +4,7 @@ import { validateName } from "../utils";
 import { checkFolderOrFileExist } from "../utils/exist";
 import { handleFileIO, handleFolderIO } from "../utils/io";
 import Database from "./Database";
+import HiveDB from "../hiveDB";
 
 export default class DatabaseHelper {
     database: Database;
@@ -22,16 +23,6 @@ export default class DatabaseHelper {
     }
 
     async saveCollectionsInfoToFile() {
-        const isFolderExist = await checkFolderOrFileExist(
-            this.database.hiveDB.hiveDB_data_folder
-        );
-        if (!isFolderExist)
-            await handleFolderIO(
-                `Error creating hiveDB data folder during "${this.database.name}" database operation`,
-                async () => {
-                    await fs.mkdir(this.database.hiveDB.hiveDB_data_folder);
-                }
-            );
         //Save collections info to a json file
         const collectionsInfo = JSON.stringify(
             this.database.collections?.map((col) => ({
