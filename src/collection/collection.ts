@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import HiveDB from "../hiveDB/hiveDB";
+import Database from "../Database/Database";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { handleFileIO } from "../utils/io";
@@ -38,21 +38,19 @@ export type FieldType<T> = {
 };
 
 // Stored document
-export type Doc<S> = { _id: string } & {
-    [K in keyof S]: FieldType<S[K]>;
-};
+export type Doc<S> = { _id: string } & FieldType<S>;
 
 export default class Collection<S extends Schema> {
     name: string;
     //for future collection relationship
-    #database: HiveDB;
+    #database: Database;
     filePath: string;
     schema: S;
     documents: Doc<S>[] = [];
     isInit: boolean = false;
     private helper: CollectionHelper<S> = new CollectionHelper(this);
 
-    constructor(name: string, schema: S, database: HiveDB) {
+    constructor(name: string, schema: S, database: Database) {
         this.helper.validateCollectionName(name);
         this.name = name;
         this.schema = schema;

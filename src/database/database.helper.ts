@@ -3,13 +3,13 @@ import { HiveError, HiveErrorCode } from "../errors";
 import { validateName } from "../utils";
 import { checkFolderOrFileExist } from "../utils/exist";
 import { handleFileIO, handleFolderIO } from "../utils/io";
-import HiveDB from "./hiveDB";
+import Database from "./Database";
 
-export default class HiveDB_Helper {
-    hiveDB: HiveDB;
+export default class DatabaseHelper {
+    database: Database;
 
-    constructor(hiveDB: HiveDB) {
-        this.hiveDB = hiveDB;
+    constructor(database: Database) {
+        this.database = database;
     }
 
     validateDatabaseName(name: string) {
@@ -23,18 +23,18 @@ export default class HiveDB_Helper {
 
     async saveCollectionsInfoToFile() {
         const isFolderExist = await checkFolderOrFileExist(
-            this.hiveDB.hiveDB_data_folder
+            this.database.hiveDB.hiveDB_data_folder
         );
         if (!isFolderExist)
             await handleFolderIO(
-                `Error creating hiveDB data folder during "${this.hiveDB.name}" database operation`,
+                `Error creating hiveDB data folder during "${this.database.name}" database operation`,
                 async () => {
-                    await fs.mkdir(this.hiveDB.hiveDB_data_folder);
+                    await fs.mkdir(this.database.hiveDB.hiveDB_data_folder);
                 }
             );
         //Save collections info to a json file
         const collectionsInfo = JSON.stringify(
-            this.hiveDB.collections?.map((col) => ({
+            this.database.collections?.map((col) => ({
                 name: col.name,
                 schema: col.schema,
             })) || "[]",
@@ -42,23 +42,30 @@ export default class HiveDB_Helper {
             2
         );
         await handleFileIO(
-            `Error saving collections info during "${this.hiveDB.name}" database operation`,
+            `Error saving collections info during "${this.database.name}" database operation`,
             async () => {
-                fs.writeFile(this.hiveDB.collectionsInfoPath, collectionsInfo);
+                fs.writeFile(
+                    this.database.collectionsInfoPath,
+                    collectionsInfo
+                );
             }
         );
     }
 
+    //TODO
     async getCollectionsInfoFromFile() {
         const isCollectionsInfoFileExist = await checkFolderOrFileExist(
-            this.hiveDB.collectionsInfoPath
+            this.database.collectionsInfoPath
         );
 
         if (isCollectionsInfoFileExist) {
             const data = await handleFileIO(
-                `Error getting collections info during "${this.hiveDB.name}" database operation`,
+                `Error getting collections info during "${this.database.name}" database operation`,
                 async () => {
-                    return fs.readFile(this.hiveDB.collectionsInfoPath, "utf8");
+                    return fs.readFile(
+                        this.database.collectionsInfoPath,
+                        "utf8"
+                    );
                 }
             );
             try {

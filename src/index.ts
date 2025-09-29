@@ -1,6 +1,7 @@
-import HiveDB from "./hiveDB/hiveDB";
+import HiveDB from "./hiveDB";
 
-const db = new HiveDB("newdb");
+const db = HiveDB.createDatabase("newdb");
+//const db2 = HiveDB.createDatabase("newdb2");
 
 await db.init();
 

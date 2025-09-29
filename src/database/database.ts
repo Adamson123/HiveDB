@@ -5,24 +5,27 @@ import fs from "fs/promises";
 import Collection, { Schema } from "../collection/collection";
 import { HiveError, HiveErrorCode } from "../errors";
 import { handleFolderIO } from "../utils/io";
-import HiveDB_Helper from "./hiveDB.helper";
+import DatabaseHelper from "./database.helper";
+import HiveDB from "../hiveDB";
 
-export default class HiveDB {
+export default class Database {
     name: string;
     folderPath: string;
-    hiveDB_data_folder: string = "./data_folder";
+    hiveDB: typeof HiveDB;
+    // hiveDB_data_folder: string = "./data_folder";
     collectionsInfoPath: string;
     // All collections in a database
     collections: Collection<any>[] = [];
     // To avoid creating collection twice in a process
     processCollectionsName: Set<string> = new Set();
-    helper: HiveDB_Helper = new HiveDB_Helper(this);
+    helper: DatabaseHelper = new DatabaseHelper(this);
 
     constructor(name: string) {
         this.helper.validateDatabaseName(name);
         this.name = name;
+        this.hiveDB = HiveDB;
         this.collectionsInfoPath = path.join(
-            this.hiveDB_data_folder,
+            this.hiveDB.hiveDB_data_folder,
             this.name + "_collections.json"
         );
         this.folderPath = path.join(allDatabesesFolder, this.name);
@@ -52,18 +55,22 @@ export default class HiveDB {
                 }
             );
         }
+
+        //Load collections info from collectionsInfoPath
         const collectionsInfo = await this.helper.getCollectionsInfoFromFile();
 
+        //Initialize collections from collectionsInfo
         if (collectionsInfo && collectionsInfo.length) {
             this.collections = collectionsInfo.map(
                 (col) => new Collection(col.name, col.schema, this)
             );
         }
+
+        await this.hiveDB.saveDatabasesInfoToFile(this.name);
     }
 
     async createCollection<S extends Schema>(name: string, schema: S) {
-        //Throw Error for trying to create a collection twice in a process
-
+        //Throw Error if collection with same name is being created in a process
         if (this.processCollectionsName.has(name)) {
             throw new HiveError(
                 HiveErrorCode.ERR_COLLECTION_EXISTS,
@@ -74,14 +81,15 @@ export default class HiveDB {
         const newCollection = new Collection<S>(name, schema, this);
         await newCollection.init();
 
-        //Cheecking if collection already exist
-        const isAlreadyExistInCollection = this.collections.find(
-            (col) => col.name === name
-        );
-        if (!isAlreadyExistInCollection) {
+        //Checking if collection already exist before pushing to collections array
+        // This is to avoid creating collection, as this collections include collections from file also, so if collection already exist in file, it will not push again
+        //It won't make sense to throw error here, as user may want to get existing collection also using createCollection method
+
+        if (!this.collections.find((col) => col.name === name)) {
             this.collections.push(newCollection);
             await this.helper.saveCollectionsInfoToFile();
         }
+
         this.processCollectionsName.add(name);
 
         return newCollection;
