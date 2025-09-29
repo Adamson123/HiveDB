@@ -59,10 +59,10 @@ export default class CollectionHelper<S extends Schema> {
         const keys = Object.keys(document);
 
         for (const key of keys) {
-            const fieldTypeInDoc = document[key];
+            const fieldTypeInDoc = typeof document[key];
             const fieldTypeInSchema = this.collection.schema[key].type;
 
-            if (typeof fieldTypeInDoc !== fieldTypeInSchema) {
+            if (fieldTypeInDoc !== fieldTypeInSchema) {
                 throw new HiveError(
                     HiveErrorCode.ERR_INVALID_FIELD_TYPE,
                     `Invalid type for field "${key}". Expect ${fieldTypeInSchema}, got ${fieldTypeInDoc}`
