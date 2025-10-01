@@ -8,8 +8,8 @@ import { checkFolderOrFileExistSync } from "./utils/exist";
 
 const HiveDB = {
     databases: [] as Database[],
-    hiveDB_data_folder: "./data_folder",
-    databaseInfoPath: path.join("data_folder", "databases_info.json"),
+    hiveDB_data_folder: "./data-folder",
+    databaseInfoPath: path.join("data-folder", "databases-info.json"),
     processDatabasesName: new Set<string>(), // To avoid creating database twice in a process
 
     async saveDatabasesInfoToFile(name: string) {

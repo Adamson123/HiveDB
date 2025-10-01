@@ -28,7 +28,7 @@ export default class Database {
         this.collectionsInfoPath = path.join(
             HiveDB.hiveDB_data_folder,
             "collections",
-            this.name + "_collections.json"
+            this.name + "-collections.json"
         );
         this.folderPath = path.join(allDatabesesFolder, this.name);
     }
