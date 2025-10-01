@@ -2,8 +2,11 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import { HiveError, HiveErrorCode } from "../errors";
 import { validateName } from "../utils";
-import { checkFolderOrFileExist } from "../utils/exist";
-import { handleFileIO } from "../utils/io";
+import {
+    checkFolderOrFileExist,
+    checkFolderOrFileExistSync,
+} from "../utils/exist";
+import { handleFileIO, handleFileIOSync } from "../utils/io";
 import Database from "./database";
 import DatabaseCallbacks from "./databaseCallbacks";
 
@@ -58,16 +61,16 @@ export default class DatabaseHelper {
     }
 
     //TODO
-    async getCollectionsInfoFromFile() {
-        const isCollectionsInfoFileExist = await checkFolderOrFileExist(
+    getCollectionsInfoFromFile() {
+        const isCollectionsInfoFileExist = checkFolderOrFileExistSync(
             this.database.collectionsInfoPath
         );
 
         if (isCollectionsInfoFileExist) {
-            const data = await handleFileIO(
+            const data = handleFileIOSync(
                 `Error getting collections info during "${this.database.name}" database operation`,
-                async () => {
-                    return fs.readFile(
+                () => {
+                    return fsSync.readFileSync(
                         this.database.collectionsInfoPath,
                         "utf8"
                     );

@@ -5,8 +5,6 @@ const db2 = HiveDB.createDatabase("newdb2");
 const db3 = HiveDB.createDatabase("newdb3");
 
 //db
-await db.init();
-
 const userSchema = db.CreateSchema({
     name: { type: "string", required: true },
     password: { type: "string", required: true },
@@ -51,8 +49,6 @@ const foundPost = await postCol.findById(existingPost._id);
 console.log(foundPost);
 
 //db2
-await db2.init();
-
 const productSchema = db2.CreateSchema({
     name: { type: "string", required: true },
     price: { type: "number", required: true },
@@ -70,8 +66,6 @@ const product = await productCol.create({
 console.log(product);
 
 //db3
-await db3.init();
-
 const categorySchema = db3.CreateSchema({
     name: { type: "string", required: true },
     description: { type: "string" },

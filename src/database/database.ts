@@ -1,7 +1,11 @@
 import path from "path";
 import { allDatabesesFolder } from "../global";
-import { checkFolderOrFileExist } from "../utils/exist";
+import {
+    checkFolderOrFileExist,
+    checkFolderOrFileExistSync,
+} from "../utils/exist";
 import fs from "fs/promises";
+import fsSync from "fs";
 import Collection, { Schema } from "../collection/collection";
 import { HiveError, HiveErrorCode } from "../errors";
 import { handleFolderIO } from "../utils/io";
@@ -43,19 +47,16 @@ export default class Database {
             );
     }
 
-    async init() {
-        const isFolderExist = await checkFolderOrFileExist(this.folderPath);
+    init() {
+        const isFolderExist = checkFolderOrFileExistSync(this.folderPath);
         if (!isFolderExist) {
-            await handleFolderIO(
-                `Error creating database "${this.name}"`,
-                async () => {
-                    await fs.mkdir(this.folderPath);
-                }
-            );
+            handleFolderIO(`Error creating database "${this.name}"`, () => {
+                fsSync.mkdirSync(this.folderPath);
+            });
         }
 
         //Load collections info from collectionsInfoPath
-        const collectionsInfo = await this.helper.getCollectionsInfoFromFile();
+        const collectionsInfo = this.helper.getCollectionsInfoFromFile();
 
         //Initialize collections from collectionsInfo
         if (collectionsInfo && collectionsInfo.length) {
@@ -63,8 +64,6 @@ export default class Database {
                 (col) => new Collection(col.name, col.schema, this)
             );
         }
-
-        await HiveDB.saveDatabasesInfoToFile(this.name);
     }
 
     createCollection<S extends Schema>(name: string, schema: S) {

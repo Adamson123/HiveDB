@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import fsSync from "fs";
-import Database from "../Database/Database";
+import Database from "../database/database";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { handleFileIO } from "../utils/io";

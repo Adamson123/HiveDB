@@ -1,4 +1,4 @@
-import Database from "./Database/Database";
+import Database from "./database/database";
 import fsSync from "fs";
 import fs from "fs/promises";
 import { handleFileIO, handleFolderIO } from "./utils/io";
@@ -70,6 +70,7 @@ const HiveDB = {
         }
 
         const newDatabase = new Database(name);
+        newDatabase.init();
 
         // Avoid creating database with same name in a process
         if (this.databases.find((db) => db.name === name)) {
@@ -78,6 +79,8 @@ const HiveDB = {
 
         this.databases.push(newDatabase);
         this.processDatabasesName.add(name);
+
+        this.saveDatabasesInfoToFile(this.name);
 
         return newDatabase;
     },
