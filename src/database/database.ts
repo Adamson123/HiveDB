@@ -11,8 +11,6 @@ import HiveDB from "../hiveDB";
 export default class Database {
     name: string;
     folderPath: string;
-    // hiveDB: typeof HiveDB;
-    // hiveDB_data_folder: string = "./data_folder";
     collectionsInfoPath: string;
     // All collections in a database
     collections: Collection<any>[] = [];
@@ -108,6 +106,9 @@ export default class Database {
 
         await collectionToDelete?.deleteCollection();
         this.collections = this.collections?.filter((col) => col.name !== name);
+        this.processCollectionsName.delete(name);
+
+        //Update collections info file after deleting collection
         await this.helper.saveCollectionsInfoToFile();
     }
 
