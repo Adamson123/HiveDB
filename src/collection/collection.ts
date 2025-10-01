@@ -4,8 +4,11 @@ import Database from "../Database/Database";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { handleFileIO } from "../utils/io";
-import { checkFolderOrFileExist } from "../utils/exist";
-import CollectionHelper from "./collection.helper";
+import {
+    checkFolderOrFileExist,
+    checkFolderOrFileExistSync,
+} from "../utils/exist";
+import CollectionHelper from "./collectionHelper";
 
 type Otherfields = {
     required?: boolean;
@@ -63,17 +66,16 @@ export default class Collection<S extends Schema> {
         this.filePath = path.join(database.folderPath, name + ".json");
     }
 
-    async init() {
+    init() {
         if (this.isInit) return;
-        const isFileExist = await checkFolderOrFileExist(this.filePath); //true
+        const isFileExist = checkFolderOrFileExistSync(this.filePath); //true
         //If file does not exist
         if (!isFileExist) {
-            await this.helper.createCollectionFile();
-
+            this.helper.createCollectionFile();
             this.documents = [];
             // return true; // Just creating collection file
         }
-        this.documents = await this.helper.getDocumentsFromFile();
+        this.documents = this.helper.getDocumentsFromFile();
         this.isInit = true;
     }
 

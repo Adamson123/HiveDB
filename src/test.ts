@@ -26,9 +26,9 @@ const postSchema = db.CreateSchema({
     },
 });
 
-const postCol = await db.createCollection("posts", postSchema);
+const postCol = db.createCollection("posts", postSchema);
 //const posts = db.createCollection("posts", postSchema);
-const userCol = await db.createCollection("users", userSchema);
+const userCol = db.createCollection("users", userSchema);
 
 const author = await userCol.create({
     name: "Adam Ajibade",
@@ -59,7 +59,7 @@ const productSchema = db2.CreateSchema({
     description: { type: "string" },
     inStock: { type: "boolean", required: true },
 });
-const productCol = await db2.createCollection("products", productSchema);
+const productCol = db2.createCollection("products", productSchema);
 const product = await productCol.create({
     name: "Laptop",
     price: 999.99,
@@ -76,8 +76,9 @@ const categorySchema = db3.CreateSchema({
     name: { type: "string", required: true },
     description: { type: "string" },
 });
-const categoryCol = await db3.createCollection("categories", categorySchema);
+const categoryCol = db3.createCollection("categories", categorySchema);
 //TODO: Fix deleteCollection not deleting the collection file
-await db3.deleteCollection("categories");
+//await db3.deleteCollection("categories");
 const category = await categoryCol.create({ name: "Electronics" });
+
 console.log(category);

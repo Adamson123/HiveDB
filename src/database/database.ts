@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import Collection, { Schema } from "../collection/collection";
 import { HiveError, HiveErrorCode } from "../errors";
 import { handleFolderIO } from "../utils/io";
-import DatabaseHelper from "./database.helper";
+import DatabaseHelper from "./databaseHelper";
 import HiveDB from "../hiveDB";
 
 export default class Database {
@@ -69,7 +69,7 @@ export default class Database {
         await HiveDB.saveDatabasesInfoToFile(this.name);
     }
 
-    async createCollection<S extends Schema>(name: string, schema: S) {
+    createCollection<S extends Schema>(name: string, schema: S) {
         //Throw Error if collection with same name is being created in a process
         if (this.processCollectionsName.has(name)) {
             throw new HiveError(
@@ -79,7 +79,7 @@ export default class Database {
         }
 
         const newCollection = new Collection<S>(name, schema, this);
-        await newCollection.init();
+        newCollection.init();
 
         //Checking if collection already exist before pushing to collections array
         // This is to avoid creating collection, as this collections include collections from file also, so if collection already exist in file, it will not push again
@@ -87,7 +87,7 @@ export default class Database {
 
         if (!this.collections.find((col) => col.name === name)) {
             this.collections.push(newCollection);
-            await this.helper.saveCollectionsInfoToFile();
+            this.helper.saveCollectionsInfoToFileSync();
         }
 
         this.processCollectionsName.add(name);
@@ -100,10 +100,15 @@ export default class Database {
             (col) => col.name === name
         );
 
+        if (!collectionToDelete)
+            throw new HiveError(
+                HiveErrorCode.ERR_COLLECTION_NOT_FOUND,
+                `The collection "${name}" does not exist `
+            );
+
         await collectionToDelete?.deleteCollection();
         this.collections = this.collections?.filter((col) => col.name !== name);
-        this.helper.saveCollectionsInfoToFile();
-        // console.log(collectionToDelete);
+        await this.helper.saveCollectionsInfoToFile();
     }
 
     //To provide type safety when defining schema

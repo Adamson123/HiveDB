@@ -1,8 +1,9 @@
 import { HiveError, HiveErrorCode } from "../errors";
 import { validateName } from "../utils/index";
-import { handleFileIO } from "../utils/io";
+import { handleFileIO, handleFileIOSync } from "../utils/io";
 import Collection, { Doc, FieldType, Schema } from "./collection";
 import fs from "fs/promises";
+import fsSync from "fs";
 
 export default class CollectionHelper<S extends Schema> {
     collection: Collection<S>;
@@ -11,20 +12,22 @@ export default class CollectionHelper<S extends Schema> {
         this.collection = collection;
     }
 
-    async createCollectionFile() {
-        await handleFileIO(
+    createCollectionFile() {
+        handleFileIO(
             `Error creating collection "${this.collection.name}"`,
-            async () => {
-                return await fs.writeFile(this.collection.filePath, "utf8");
+            () => {
+                fsSync.writeFileSync(this.collection.filePath, "", {
+                    encoding: "utf8",
+                });
             }
         );
     }
 
-    async getDocumentsFromFile(): Promise<Doc<S>[]> {
-        const data = await handleFileIO(
+    getDocumentsFromFile(): Doc<S>[] {
+        const data = handleFileIOSync(
             `Error reading collection "${this.collection.name}"`,
-            async () => {
-                return await fs.readFile(this.collection.filePath, "utf8");
+            () => {
+                return fsSync.readFileSync(this.collection.filePath, "utf8");
             }
         );
 
@@ -32,7 +35,7 @@ export default class CollectionHelper<S extends Schema> {
 
         // If file is empty, return empty array
         if (!trimmed) {
-            await this.createCollectionFile();
+            this.createCollectionFile();
             return [];
         }
 
@@ -40,7 +43,6 @@ export default class CollectionHelper<S extends Schema> {
         try {
             return JSON.parse(trimmed) as Doc<S>[];
         } catch {
-            //await this.createCollectionFile();
             return [];
         }
     }
@@ -50,7 +52,7 @@ export default class CollectionHelper<S extends Schema> {
         await handleFileIO(
             `Error saving document to collection "${this.collection.name}"`,
             async () => {
-                fs.writeFile(this.collection.filePath, documents);
+                await fs.writeFile(this.collection.filePath, documents);
             }
         );
     }

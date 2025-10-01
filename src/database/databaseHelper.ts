@@ -1,16 +1,19 @@
 import fs from "fs/promises";
+import fsSync from "fs";
 import { HiveError, HiveErrorCode } from "../errors";
 import { validateName } from "../utils";
 import { checkFolderOrFileExist } from "../utils/exist";
-import { handleFileIO, handleFolderIO } from "../utils/io";
-import Database from "./Database";
-import HiveDB from "../hiveDB";
+import { handleFileIO } from "../utils/io";
+import Database from "./database";
+import DatabaseCallbacks from "./databaseCallbacks";
 
 export default class DatabaseHelper {
     database: Database;
+    private callbacks: DatabaseCallbacks;
 
     constructor(database: Database) {
         this.database = database;
+        this.callbacks = new DatabaseCallbacks(database);
     }
 
     validateDatabaseName(name: string) {
@@ -22,22 +25,33 @@ export default class DatabaseHelper {
         }
     }
 
+    // Synchronous version of saveCollectionsInfoToFile
+    saveCollectionsInfoToFileSync() {
+        this.callbacks.saveCollectionsInfoToFileFunc((collectionsInfo) => {
+            handleFileIO(
+                `Error saving collections info during "${this.database.name}" database operation`,
+                () => {
+                    fsSync.writeFileSync(
+                        this.database.collectionsInfoPath,
+                        collectionsInfo
+                    );
+                }
+            );
+        });
+    }
+
+    // Asynchronous version of saveCollectionsInfoToFile
     async saveCollectionsInfoToFile() {
-        //Save collections info to a json file
-        const collectionsInfo = JSON.stringify(
-            this.database.collections?.map((col) => ({
-                name: col.name,
-                schema: col.schema,
-            })) || "[]",
-            null,
-            2
-        );
-        await handleFileIO(
-            `Error saving collections info during "${this.database.name}" database operation`,
-            async () => {
-                fs.writeFile(
-                    this.database.collectionsInfoPath,
-                    collectionsInfo
+        this.callbacks.saveCollectionsInfoToFileFunc(
+            async (collectionsInfo) => {
+                await handleFileIO(
+                    `Error saving collections info during "${this.database.name}" database operation`,
+                    async () => {
+                        await fs.writeFile(
+                            this.database.collectionsInfoPath,
+                            collectionsInfo
+                        );
+                    }
                 );
             }
         );
