@@ -1,5 +1,11 @@
 [
   {
-    "name": "myDatabase"
+    "name": "newdb"
+  },
+  {
+    "name": "newdb2"
+  },
+  {
+    "name": "newdb3"
   }
 ]

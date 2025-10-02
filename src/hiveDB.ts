@@ -5,7 +5,6 @@ import { handleFileIO, handleFolderIO } from "./utils/io.js";
 import path from "path";
 import { HiveError, HiveErrorCode } from "./errors.js";
 import { checkFolderOrFileExistSync } from "./utils/exist.js";
-import { Schema } from "./collection/collection.js";
 import { fileURLToPath } from "url"; // ADD
 
 // Resolve package root (dist -> package root at runtime), allow env override

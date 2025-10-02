@@ -9,44 +9,8 @@ import {
     checkFolderOrFileExistSync,
 } from "../utils/exist.js";
 import CollectionHelper from "./collectionHelper.js";
-
-type Otherfields = {
-    required?: boolean;
-};
-
-export type FieldSpec =
-    | ({ type: "string" } & Otherfields)
-    | ({ type: "number" } & Otherfields)
-    | ({ type: "boolean" } & Otherfields);
-
-export type Schema = Record<string, FieldSpec>;
-
-export type FieldType<T> = {
-    // required fields
-    [K in keyof T as T[K] extends { required: true }
-        ? K
-        : never]: T[K] extends { type: "string" }
-        ? string
-        : T[K] extends { type: "number" }
-        ? number
-        : T[K] extends { type: "boolean" }
-        ? boolean
-        : never;
-} & {
-    // optional fields
-    [K in keyof T as T[K] extends { required: true }
-        ? never
-        : K]?: T[K] extends { type: "string" }
-        ? string
-        : T[K] extends { type: "number" }
-        ? number
-        : T[K] extends { type: "boolean" }
-        ? boolean
-        : never;
-};
-
-// Stored document
-export type Doc<S> = { _id: string } & FieldType<S>;
+import CollectionDeleteMethods from "./collectionDeleteMethods.js";
+import CollectionFindMethods from "./collectionFindMethods.js";
 
 export default class Collection<S extends Schema> {
     name: string;
@@ -57,6 +21,9 @@ export default class Collection<S extends Schema> {
     documents: Doc<S>[] = [];
     isInit: boolean = false;
     private helper: CollectionHelper<S> = new CollectionHelper(this);
+    private deleteMethods: CollectionDeleteMethods<S> =
+        new CollectionDeleteMethods<S>(this.documents, this.helper);
+    private findMethods = new CollectionFindMethods<S>(this.documents);
 
     constructor(name: string, schema: S, database: Database) {
         this.helper.validateCollectionName(name);
@@ -75,12 +42,14 @@ export default class Collection<S extends Schema> {
             this.documents = [];
             // return true; // Just creating collection file
         }
+
         this.documents = this.helper.getDocumentsFromFile();
         this.isInit = true;
     }
 
     async deleteCollection() {
         const isFileExist = await checkFolderOrFileExist(this.filePath);
+
         if (isFileExist)
             await handleFileIO(
                 `Error deleting collection "${this.name}"`,
@@ -92,63 +61,77 @@ export default class Collection<S extends Schema> {
             );
     }
 
+    /**
+     * Create a new document in the collection
+     * @param document The document to create
+     * @returns The created document with a unique _id
+     */
     async create(document: FieldType<S>): Promise<Doc<S>> {
-        //  await this.init();
-
         this.helper.validateRequiredFields(document);
         this.helper.validateFieldTypes(document);
 
         const newDocument: Doc<S> = { _id: uuid(), ...(document as any) };
         this.documents.push(newDocument);
+
         await this.helper.saveDocumentsToFile();
         return newDocument;
     }
 
+    // Delete methods
+
+    /**
+     * Update a document by its ID
+     * @param _id The ID of the document to update
+     * @returns void
+     */
     async deleteById(_id: string) {
-        // await this.init();
-
-        this.documents = this.documents.filter((doc) => doc._id !== _id);
-        await this.helper.saveDocumentsToFile();
+        return await this.deleteMethods.deleteById(_id);
     }
 
-    async delete(query: Partial<Doc<S>>) {
-        //  await this.init();
-
-        const keys = Object.keys(query) as (keyof S)[];
-        if (keys.length === 0) {
-            // delete all
-            this.documents = [];
-        } else {
-            // keep docs that DO NOT fully match the query
-            this.documents = this.documents.filter((doc) =>
-                keys.some((key) => (doc as any)[key] !== (query as any)[key])
-            );
-        }
-
-        await this.helper.saveDocumentsToFile();
+    /**
+     * Delete a single document matching the query
+     * @param query The query to match the document for deletion
+     * @returns void
+     */
+    async deleteOne(query: Partial<Doc<S>>) {
+        return await this.deleteMethods.deleteOne(query);
     }
 
+    /**
+     * Delete multiple documents matching the query
+     * @param query The query to match documents for deletion
+     * @returns void
+     */
+    async deleteMany(query: Partial<Doc<S>>) {
+        return await this.deleteMethods.deleteMany(query);
+    }
+
+    // Find methods
+
+    /**
+     * Find a document by its ID
+     * @param _id The ID of the document to find
+     * @returns The found document or undefined if not found
+     * */
     async findById(_id: string): Promise<Doc<S> | undefined> {
-        // await this.init();
-
-        return this.documents.find((doc) => doc._id === _id);
+        return await this.findMethods.findById(_id);
     }
 
-    async find(query: Partial<Doc<S>>): Promise<Doc<S>[]> {
-        //  await this.init();
-
-        const keys = Object.keys(query) as (keyof S)[];
-        return this.documents.filter((doc) =>
-            keys.every((key) => (doc as any)[key] === (query as any)[key])
-        );
-    }
-
+    /**
+     *  Find a single document matching the query
+     * @param query The query to match the document
+     * @returns The found document or undefined if not found
+     * */
     async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
-        //   await this.init();
+        return await this.findMethods.findOne(query);
+    }
 
-        const keys = Object.keys(query) as (keyof S)[];
-        return this.documents.find((doc) =>
-            keys.every((key) => (doc as any)[key] === (query as any)[key])
-        ) as Doc<S>;
+    /**
+     * Find multiple documents matching the query
+     * @param query The query to match documents
+     * @returns An array of matching documents
+     * */
+    async find(query?: Partial<Doc<S>>): Promise<Doc<S>[]> {
+        return await this.findMethods.find(query);
     }
 }

@@ -6,7 +6,7 @@ import {
 } from "../utils/exist.js";
 import fs from "fs/promises";
 import fsSync from "fs";
-import Collection, { Schema } from "../collection/collection.js";
+import Collection from "../collection/collection.js";
 import { HiveError, HiveErrorCode } from "../errors.js";
 import { handleFolderIO } from "../utils/io.js";
 import DatabaseHelper from "./databaseHelper.js";

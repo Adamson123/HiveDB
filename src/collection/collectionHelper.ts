@@ -1,7 +1,7 @@
 import { HiveError, HiveErrorCode } from "../errors.js";
 import { validateName } from "../utils/index.js";
 import { handleFileIO, handleFileIOSync } from "../utils/io.js";
-import Collection, { Doc, FieldType, Schema } from "./collection.js";
+import Collection from "./collection.js";
 import fs from "fs/promises";
 import fsSync from "fs";
 
@@ -56,6 +56,11 @@ export default class CollectionHelper<S extends Schema> {
             }
         );
     }
+
+    objectNotEmpty = (obj: object) => {
+        if (!obj || Object.keys(obj).length === 0) return false;
+        return true;
+    };
 
     validateFieldTypes = (document: FieldType<S>) => {
         const keys = Object.keys(document);
