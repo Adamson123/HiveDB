@@ -1,14 +1,11 @@
 import fs from "fs/promises";
 import fsSync from "fs";
-import { HiveError, HiveErrorCode } from "../errors";
-import { validateName } from "../utils";
-import {
-    checkFolderOrFileExist,
-    checkFolderOrFileExistSync,
-} from "../utils/exist";
-import { handleFileIO, handleFileIOSync } from "../utils/io";
-import Database from "./database";
-import DatabaseCallbacks from "./databaseCallbacks";
+import { HiveError, HiveErrorCode } from "../errors.js";
+import { validateName } from "../utils/index.js";
+import { checkFolderOrFileExistSync } from "../utils/exist.js";
+import { handleFileIO, handleFileIOSync } from "../utils/io.js";
+import Database from "./database.js";
+import DatabaseCallbacks from "./databaseCallbacks.js";
 
 export default class DatabaseHelper {
     database: Database;

@@ -1,4 +1,4 @@
-import { HiveError, HiveErrorCode } from "../errors";
+import { HiveError, HiveErrorCode } from "../errors.js";
 
 // Handle folder IO asynchronous version
 export const handleFolderIO = async (

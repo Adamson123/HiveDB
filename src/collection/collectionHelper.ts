@@ -1,7 +1,7 @@
-import { HiveError, HiveErrorCode } from "../errors";
-import { validateName } from "../utils/index";
-import { handleFileIO, handleFileIOSync } from "../utils/io";
-import Collection, { Doc, FieldType, Schema } from "./collection";
+import { HiveError, HiveErrorCode } from "../errors.js";
+import { validateName } from "../utils/index.js";
+import { handleFileIO, handleFileIOSync } from "../utils/io.js";
+import Collection, { Doc, FieldType, Schema } from "./collection.js";
 import fs from "fs/promises";
 import fsSync from "fs";
 
@@ -61,7 +61,7 @@ export default class CollectionHelper<S extends Schema> {
         const keys = Object.keys(document);
 
         for (const key of keys) {
-            const fieldTypeInDoc = typeof document[key];
+            const fieldTypeInDoc = typeof document[key as keyof FieldType<S>];
             const fieldTypeInSchema = this.collection.schema[key].type;
 
             if (fieldTypeInDoc !== fieldTypeInSchema) {

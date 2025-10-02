@@ -1,14 +1,14 @@
 import fs from "fs/promises";
 import fsSync from "fs";
-import Database from "../database/database";
+import Database from "../database/database.js";
 import path from "path";
 import { v4 as uuid } from "uuid";
-import { handleFileIO } from "../utils/io";
+import { handleFileIO } from "../utils/io.js";
 import {
     checkFolderOrFileExist,
     checkFolderOrFileExistSync,
-} from "../utils/exist";
-import CollectionHelper from "./collectionHelper";
+} from "../utils/exist.js";
+import CollectionHelper from "./collectionHelper.js";
 
 type Otherfields = {
     required?: boolean;

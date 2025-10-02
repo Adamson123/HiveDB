@@ -1,6 +1,39 @@
 {
-  "dependencies": {
-    "@types/node": "^24.5.2",
-    "uuid": "^13.0.0"
-  }
+    "name": "hivedb",
+    "version": "0.1.0",
+    "description": "Lightweight JSON file database",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "prepare": "npm run build",
+        "pack:global": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; npm.cmd run build; $tgz = npm.cmd pack | Select-Object -Last 1; try { npm.cmd uninstall -g hivedb } catch {}; npm.cmd i -g (Resolve-Path $tgz)\"",
+        "unlink:global": "npm uninstall -g hivedb",
+        "link:local": "node scripts/stage-link.cjs"
+    },
+    "keywords": [
+        "database",
+        "json",
+        "file",
+        "bun",
+        "node"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "uuid": "^13.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.6.3",
+        "@types/node": "^20.14.12"
+    }
 }

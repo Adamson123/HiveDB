@@ -1,4 +1,4 @@
-import Database from "./database";
+import Database from "./database.js";
 
 // Methods thats takes a callback function as parameter
 export default class DatabaseCallbacks {

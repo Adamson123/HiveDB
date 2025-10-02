@@ -19,5 +19,12 @@
     "price": 999.99,
     "description": "A high-performance laptop",
     "inStock": true
+  },
+  {
+    "_id": "1e9be5ad-205e-463d-9037-eb1db0dd71b7",
+    "name": "Laptop",
+    "price": 999.99,
+    "description": "A high-performance laptop",
+    "inStock": true
   }
 ]

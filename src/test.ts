@@ -1,11 +1,11 @@
-import HiveDB from "./hiveDB";
+import HiveDB from "./hiveDB.js";
 
 const db = HiveDB.createDatabase("newdb");
 const db2 = HiveDB.createDatabase("newdb2");
 const db3 = HiveDB.createDatabase("newdb3");
 
 //db
-const userSchema = db.CreateSchema({
+const userSchema = HiveDB.createSchema({
     name: { type: "string", required: true },
     password: { type: "string", required: true },
     bio: { type: "string" },
@@ -14,7 +14,7 @@ const userSchema = db.CreateSchema({
     },
 });
 
-const postSchema = db.CreateSchema({
+const postSchema = HiveDB.createSchema({
     title: { type: "string", required: true },
     subtitle: { type: "string" },
     content: { type: "string" },
@@ -49,7 +49,7 @@ const foundPost = await postCol.findById(existingPost._id);
 console.log(foundPost);
 
 //db2
-const productSchema = db2.CreateSchema({
+const productSchema = HiveDB.createSchema({
     name: { type: "string", required: true },
     price: { type: "number", required: true },
     description: { type: "string" },
@@ -66,7 +66,7 @@ const product = await productCol.create({
 console.log(product);
 
 //db3
-const categorySchema = db3.CreateSchema({
+const categorySchema = HiveDB.createSchema({
     name: { type: "string", required: true },
     description: { type: "string" },
 });

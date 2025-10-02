@@ -1,16 +1,16 @@
 import path from "path";
-import { allDatabesesFolder } from "../global";
+//import { allDatabesesFolder } from "../constants.js";
 import {
     checkFolderOrFileExist,
     checkFolderOrFileExistSync,
-} from "../utils/exist";
+} from "../utils/exist.js";
 import fs from "fs/promises";
 import fsSync from "fs";
-import Collection, { Schema } from "../collection/collection";
-import { HiveError, HiveErrorCode } from "../errors";
-import { handleFolderIO } from "../utils/io";
-import DatabaseHelper from "./databaseHelper";
-import HiveDB from "../hiveDB";
+import Collection, { Schema } from "../collection/collection.js";
+import { HiveError, HiveErrorCode } from "../errors.js";
+import { handleFolderIO } from "../utils/io.js";
+import DatabaseHelper from "./databaseHelper.js";
+import HiveDB from "../hiveDB.js";
 
 export default class Database {
     name: string;
@@ -30,7 +30,7 @@ export default class Database {
             "collections",
             this.name + "-collections.json"
         );
-        this.folderPath = path.join(allDatabesesFolder, this.name);
+        this.folderPath = path.join(HiveDB.allDatabesesFolder, this.name);
     }
 
     async deleteDatabase() {
@@ -61,7 +61,7 @@ export default class Database {
         //Initialize collections from collectionsInfo
         if (collectionsInfo && collectionsInfo.length) {
             this.collections = collectionsInfo.map(
-                (col) => new Collection(col.name, col.schema, this)
+                (col: any) => new Collection(col.name, col.schema, this)
             );
         }
     }
@@ -109,10 +109,5 @@ export default class Database {
 
         //Update collections info file after deleting collection
         await this.helper.saveCollectionsInfoToFile();
-    }
-
-    //To provide type safety when defining schema
-    CreateSchema<S extends Schema>(schema: S) {
-        return schema;
     }
 }
