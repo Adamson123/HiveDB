@@ -1,3 +1,4 @@
+import { Document, Schema } from "../types/index.js";
 import Collection from "./collection.js";
 import CollectionHelper from "./collectionHelper.js";
 
@@ -17,7 +18,7 @@ export default class CollectionDeleteMethods<S extends Schema> {
         await this.helper.saveDocumentsToFile();
     }
 
-    async deleteOne(query: Partial<Doc<S>>) {
+    async deleteOne(query: Partial<Document<S>>) {
         if (!this.helper.objectNotEmpty(query)) return;
 
         const keys = Object.keys(query);
@@ -29,7 +30,7 @@ export default class CollectionDeleteMethods<S extends Schema> {
         await this.helper.saveDocumentsToFile();
     }
 
-    async deleteMany(query: Partial<Doc<S>>) {
+    async deleteMany(query: Partial<Document<S>>) {
         if (!this.helper.objectNotEmpty(query)) return;
 
         const keys = Object.keys(query);

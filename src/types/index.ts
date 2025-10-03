@@ -1,15 +1,15 @@
-type Otherfields = {
+export type Otherfields = {
     required?: boolean;
 };
 
-type FieldSpec =
+export type FieldSpec =
     | ({ type: "string" } & Otherfields)
     | ({ type: "number" } & Otherfields)
     | ({ type: "boolean" } & Otherfields);
 
-type Schema = Record<string, FieldSpec>;
+export type Schema = Record<string, FieldSpec>;
 
-type FieldType<T> = {
+export type FieldType<T> = {
     // required fields
     [K in keyof T as T[K] extends { required: true }
         ? K
@@ -34,4 +34,4 @@ type FieldType<T> = {
 };
 
 // Stored document
-type Doc<S> = { _id: string } & FieldType<S>;
+export type Document<S> = { _id: string } & FieldType<S>;

@@ -1,3 +1,4 @@
+import { Document, Schema } from "../types/index.js";
 import Collection from "./collection.js";
 import CollectionHelper from "./collectionHelper.js";
 
@@ -10,7 +11,7 @@ export default class CollectionUpdateMethods<S extends Schema> {
         this.helper = collection.helper;
     }
 
-    async updateById(_id: string, update: Partial<Doc<S>>) {
+    async updateById(_id: string, update: Partial<Document<S>>) {
         let docToUpdate = this.collection.documents.find(
             (doc) => doc._id === _id
         );
@@ -38,7 +39,7 @@ export default class CollectionUpdateMethods<S extends Schema> {
         return docToUpdate;
     }
 
-    async updateOne(query: Partial<Doc<S>>, update: Partial<Doc<S>>) {
+    async updateOne(query: Partial<Document<S>>, update: Partial<Document<S>>) {
         // Check if query is empty
         if (!this.helper.objectNotEmpty(query)) return;
 
@@ -70,7 +71,10 @@ export default class CollectionUpdateMethods<S extends Schema> {
         return docToUpdate;
     }
 
-    async updateMany(query: Partial<Doc<S>>, update: Partial<Doc<S>>) {
+    async updateMany(
+        query: Partial<Document<S>>,
+        update: Partial<Document<S>>
+    ) {
         // Check if query is empty
         if (!this.helper.objectNotEmpty(query)) return;
 
@@ -82,7 +86,7 @@ export default class CollectionUpdateMethods<S extends Schema> {
         const trimmedUpdate = this.helper.removeKeysNotDefinedInSchema(update);
         this.helper.validateFieldTypes(trimmedUpdate);
 
-        let updatedDocuments: Doc<S>[] = [];
+        let updatedDocuments: Document<S>[] = [];
 
         const keys = Object.keys(query);
         this.collection.documents = this.collection.documents.map((doc) => {

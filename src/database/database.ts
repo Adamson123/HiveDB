@@ -11,6 +11,7 @@ import { HiveError, HiveErrorCode } from "../errors.js";
 import { handleFolderIO } from "../utils/io.js";
 import DatabaseHelper from "./databaseHelper.js";
 import { PATHS } from "../constants.js";
+import { Schema } from "../types/index.js";
 
 export default class Database {
     name: string;

@@ -6,6 +6,7 @@ import path from "path";
 import { HiveError, HiveErrorCode } from "./errors.js";
 import { checkFolderOrFileExistSync } from "./utils/exist.js";
 import { PATHS } from "./constants.js";
+import { Schema } from "./types/index.js";
 
 const HiveDB = {
     databases: [] as Database[],
@@ -44,6 +45,7 @@ const HiveDB = {
                 }
             );
     },
+
     loadDatabasesInfoFromFile() {
         const isFolderExist = checkFolderOrFileExistSync(
             PATHS.hiveDBDataFolder

@@ -13,6 +13,7 @@ import CollectionDeleteMethods from "./collectionDeleteMethods.js";
 import CollectionFindMethods from "./collectionFindMethods.js";
 import { HiveError, HiveErrorCode } from "../errors.js";
 import CollectionUpdateMethods from "./collectionUpdateMethods.js";
+import { Document, FieldType, Schema } from "../types/index.js";
 
 export default class Collection<S extends Schema> {
     name: string;
@@ -20,7 +21,7 @@ export default class Collection<S extends Schema> {
     #database: Database;
     filePath: string;
     schema: S;
-    documents: Doc<S>[] = [];
+    documents: Document<S>[] = [];
     //isInit: boolean = false;
     helper: CollectionHelper<S> = new CollectionHelper(this);
     private deleteMethods: CollectionDeleteMethods<S> =
@@ -40,6 +41,7 @@ export default class Collection<S extends Schema> {
     init() {
         const isFileExist = checkFolderOrFileExistSync(this.filePath);
 
+        // If file does not exist, create it and initialize documents as empty array
         if (!isFileExist) {
             this.helper.createCollectionFile();
             this.documents = [];
@@ -68,7 +70,7 @@ export default class Collection<S extends Schema> {
      * @param document The document to create
      * @returns The created document with a unique _id
      */
-    async create(document: FieldType<S>): Promise<Doc<S>> {
+    async create(document: FieldType<S>): Promise<Document<S>> {
         if (!document)
             throw new HiveError(
                 HiveErrorCode.ERR_UNDEFINED_DOCUMENT,
@@ -77,11 +79,10 @@ export default class Collection<S extends Schema> {
 
         const trimmedDocument =
             this.helper.removeKeysNotDefinedInSchema(document);
-
         this.helper.validateRequiredFields(trimmedDocument);
         this.helper.validateFieldTypes(trimmedDocument);
 
-        const newDocument: Doc<S> = {
+        const newDocument: Document<S> = {
             _id: uuid(),
             ...(trimmedDocument as any),
         };
@@ -107,7 +108,7 @@ export default class Collection<S extends Schema> {
      * @param query The query to match the document for deletion
      * @returns void
      */
-    async deleteOne(query: Partial<Doc<S>>) {
+    async deleteOne(query: Partial<Document<S>>) {
         return await this.deleteMethods.deleteOne(query);
     }
 
@@ -116,7 +117,7 @@ export default class Collection<S extends Schema> {
      * @param query The query to match documents for deletion
      * @returns void
      */
-    async deleteMany(query: Partial<Doc<S>>) {
+    async deleteMany(query: Partial<Document<S>>) {
         return await this.deleteMethods.deleteMany(query);
     }
 
@@ -127,7 +128,7 @@ export default class Collection<S extends Schema> {
      * @param _id The ID of the document to find
      * @returns The found document or undefined if not found
      * */
-    async findById(_id: string): Promise<Doc<S> | undefined> {
+    async findById(_id: string): Promise<Document<S> | undefined> {
         return await this.findMethods.findById(_id);
     }
 
@@ -136,7 +137,7 @@ export default class Collection<S extends Schema> {
      * @param query The query to match the document
      * @returns The found document or undefined if not found
      * */
-    async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
+    async findOne(query: Partial<Document<S>>): Promise<Document<S>> {
         return await this.findMethods.findOne(query);
     }
 
@@ -145,7 +146,7 @@ export default class Collection<S extends Schema> {
      * @param query The query to match documents
      * @returns An array of matching documents
      * */
-    async findMany(query?: Partial<Doc<S>>): Promise<Doc<S>[]> {
+    async findMany(query?: Partial<Document<S>>): Promise<Document<S>[]> {
         return await this.findMethods.findMany(query);
     }
 
@@ -157,7 +158,7 @@ export default class Collection<S extends Schema> {
      * @param update The fields to update in the document
      * @returns The updated document or undefined if not found
      */
-    async updateById(_id: string, update: Partial<Doc<S>>) {
+    async updateById(_id: string, update: Partial<Document<S>>) {
         return await this.updateMethods.updateById(_id, update);
     }
 
@@ -167,7 +168,7 @@ export default class Collection<S extends Schema> {
      * @param update The fields to update in the document
      * @returns The updated document or undefined if not found
      */
-    async updateOne(query: Partial<Doc<S>>, update: Partial<Doc<S>>) {
+    async updateOne(query: Partial<Document<S>>, update: Partial<Document<S>>) {
         return await this.updateMethods.updateOne(query, update);
     }
 
@@ -177,7 +178,10 @@ export default class Collection<S extends Schema> {
      * @param update The fields to update in the documents
      * @return An array of updated documents
      */
-    async updateMany(query: Partial<Doc<S>>, update: Partial<Doc<S>>) {
+    async updateMany(
+        query: Partial<Document<S>>,
+        update: Partial<Document<S>>
+    ) {
         return await this.updateMethods.updateMany(query, update);
     }
 }

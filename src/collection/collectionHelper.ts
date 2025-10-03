@@ -4,6 +4,7 @@ import { handleFileIO, handleFileIOSync } from "../utils/io.js";
 import Collection from "./collection.js";
 import fs from "fs/promises";
 import fsSync from "fs";
+import { Document, FieldType, Schema } from "../types/index.js";
 
 export default class CollectionHelper<S extends Schema> {
     collection: Collection<S>;
@@ -23,7 +24,7 @@ export default class CollectionHelper<S extends Schema> {
         );
     }
 
-    getDocumentsFromFile(): Doc<S>[] {
+    getDocumentsFromFile(): Document<S>[] {
         const data = handleFileIOSync(
             `Error reading collection "${this.collection.name}"`,
             () => {
@@ -41,7 +42,7 @@ export default class CollectionHelper<S extends Schema> {
 
         // Try to parse JSON, if fails, return empty array
         try {
-            return JSON.parse(trimmed) as Doc<S>[];
+            return JSON.parse(trimmed) as Document<S>[];
         } catch {
             return [];
         }
@@ -62,7 +63,7 @@ export default class CollectionHelper<S extends Schema> {
         return true;
     };
 
-    validateFieldTypes = (document: FieldType<S> | Partial<Doc<S>>) => {
+    validateFieldTypes = (document: FieldType<S> | Partial<Document<S>>) => {
         const keys = Object.keys(document);
 
         for (const key of keys) {
@@ -78,7 +79,7 @@ export default class CollectionHelper<S extends Schema> {
         }
     };
 
-    validateRequiredFields(document: FieldType<S> | Partial<Doc<S>>) {
+    validateRequiredFields(document: FieldType<S> | Partial<Document<S>>) {
         const requiredSchemaKeys = Object.keys(this.collection.schema).filter(
             (key) => this.collection.schema[key].required
         );
@@ -103,7 +104,9 @@ export default class CollectionHelper<S extends Schema> {
         }
     }
 
-    removeKeysNotDefinedInSchema(document: FieldType<S> | Partial<Doc<S>>) {
+    removeKeysNotDefinedInSchema(
+        document: FieldType<S> | Partial<Document<S>>
+    ) {
         const schemaKeys = Object.keys(this.collection.schema);
         const docKeys = Object.keys(document);
 
