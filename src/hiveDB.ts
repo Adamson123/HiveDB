@@ -54,13 +54,12 @@ const HiveDB = {
             handleFolderIO(
                 `Error creating hiveDB data folder during`,
                 async () => {
-                    fsSync.mkdirSync(PATHS.hiveDBDataFolder, {
-                        recursive: true,
-                    });
+                    // Create hivedb-metadata folder if it doesn't exist
                     fsSync.mkdirSync(
                         path.join(PATHS.hiveDBDataFolder, "collections"),
                         { recursive: true }
                     );
+                    // Create hives (databases folder) folder if it doesn't exist
                     fsSync.mkdirSync(PATHS.allDatabesesFolder, {
                         recursive: true,
                     });

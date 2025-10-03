@@ -85,7 +85,7 @@ More complete example: [src/demo.ts](c:\Users\Admin\Desktop\HiveDB\src\demo.ts)
 -   Databases
 
     -   Created via [`HiveDB.createDatabase`](c:\Users\Admin\Desktop\HiveDB\src\hiveDB.ts) and stored under PATHS.allDatabesesFolder as folders.
-    -   Each database persists its collections metadata in a per-db JSON file (e.g., data-folder/collections/<db>-collections.json).
+    -   Each database persists its collections metadata in a per-db JSON file (e.g., hivedb-metadata/collections/<db>-collections.json).
 
 -   Collections
 
@@ -113,8 +113,8 @@ More complete example: [src/demo.ts](c:\Users\Admin\Desktop\HiveDB\src\demo.ts)
 All file paths are anchored to the package root by [src/constants.ts](c:\Users\Admin\Desktop\HiveDB\src\constants.ts):
 
 -   hives/ — per-database folders and collection JSON files
--   data-folder/databases-info.json — list of known databases
--   data-folder/collections/<db>-collections.json — per-db collection metadata
+-   hivedb-metadata/databases-info.json — list of known databases
+-   hivedb-metadata/collections/<db>-collections.json — per-db collection metadata
 
 Override the root with an env var:
 
