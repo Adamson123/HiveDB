@@ -5,4 +5,4 @@ dist
 scripts
 .publish
 hives
-data-folder
+hivedb-metadata
