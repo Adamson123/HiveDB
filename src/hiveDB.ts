@@ -70,9 +70,13 @@ const HiveDB = {
             try {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed)) {
-                    this.databases = parsed.map(
-                        (db: { name: string }) => new Database(db.name)
-                    );
+                    this.databases = parsed.map((db: { name: string }) => {
+                        const d = new Database(db.name);
+                        d.init();
+                        return d;
+                    });
+                    console.log(this.databases.length, "databases loaded.");
+                    //   this.databases.forEach((db) => db.init());
                 }
             } catch {
                 this.databases = [];

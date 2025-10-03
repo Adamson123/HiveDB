@@ -78,7 +78,6 @@ export default class Collection<S extends Schema> {
 
         const trimmedDocument =
             this.helper.removeKeysNotDefinedInSchema(document);
-        console.log(trimmedDocument, "trimmedDocument");
 
         this.helper.validateRequiredFields(trimmedDocument);
         this.helper.validateFieldTypes(trimmedDocument);
