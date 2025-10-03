@@ -5,21 +5,10 @@ import { handleFileIO, handleFolderIO } from "./utils/io.js";
 import path from "path";
 import { HiveError, HiveErrorCode } from "./errors.js";
 import { checkFolderOrFileExistSync } from "./utils/exist.js";
-import { fileURLToPath } from "url"; // ADD
 import { PATHS } from "./constants.js";
-
-// Resolve package root (dist -> package root at runtime), allow env override
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PACKAGE_ROOT = path.resolve(__dirname, "..");
-const HIVE_ROOT =
-    process.env.HIVEDB_ROOT && process.env.HIVEDB_ROOT.trim()
-        ? path.resolve(process.env.HIVEDB_ROOT)
-        : PACKAGE_ROOT;
 
 const HiveDB = {
     databases: [] as Database[],
-
     processDatabasesName: new Set<string>(), // To avoid creating database twice in a process
 
     async saveDatabasesInfoToFile(name: string) {
