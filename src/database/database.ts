@@ -26,8 +26,7 @@ export default class Database {
         this.helper.validateDatabaseName(name);
         this.name = name;
         this.collectionsInfoPath = path.join(
-            PATHS.hiveDBDataFolder,
-            "collections",
+            PATHS.collectionsFolder,
             this.name + "-collections.json"
         );
         this.folderPath = path.join(PATHS.allDatabesesFolder, this.name);
