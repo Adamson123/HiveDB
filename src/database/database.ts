@@ -10,7 +10,6 @@ import Collection from "../collection/collection.js";
 import { HiveError, HiveErrorCode } from "../errors.js";
 import { handleFolderIO } from "../utils/io.js";
 import DatabaseHelper from "./databaseHelper.js";
-import HiveDB from "../hiveDB.js";
 import { PATHS } from "../constants.js";
 
 export default class Database {

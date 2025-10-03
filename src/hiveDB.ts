@@ -65,7 +65,7 @@ const HiveDB = {
                 }
             );
 
-        if (fsSync.existsSync(PATHS.databaseInfoPath)) {
+        if (checkFolderOrFileExistSync(PATHS.databaseInfoPath)) {
             const data = fsSync.readFileSync(PATHS.databaseInfoPath, "utf8");
             try {
                 const parsed = JSON.parse(data);
