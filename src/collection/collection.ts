@@ -21,7 +21,7 @@ export default class Collection<S extends Schema> {
     filePath: string;
     schema: S;
     documents: Doc<S>[] = [];
-    isInit: boolean = false;
+    //isInit: boolean = false;
     helper: CollectionHelper<S> = new CollectionHelper(this);
     private deleteMethods: CollectionDeleteMethods<S> =
         new CollectionDeleteMethods<S>(this);
@@ -38,7 +38,7 @@ export default class Collection<S extends Schema> {
     }
 
     init() {
-        if (this.isInit) return;
+     
         const isFileExist = checkFolderOrFileExistSync(this.filePath); //true
 
         if (!isFileExist) {
@@ -47,7 +47,7 @@ export default class Collection<S extends Schema> {
         }
 
         this.documents = this.helper.getDocumentsFromFile();
-        this.isInit = true;
+        
     }
 
     async deleteCollection() {
@@ -95,8 +95,8 @@ export default class Collection<S extends Schema> {
     // Delete methods
 
     /**
-     * Update a document by its ID
-     * @param _id The ID of the document to update
+     * Delete a document by its ID
+     * @param _id The ID of the document to delete
      * @returns void
      */
     async deleteById(_id: string) {
