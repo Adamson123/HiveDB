@@ -38,16 +38,15 @@ export default class Collection<S extends Schema> {
     }
 
     init() {
-     
-        const isFileExist = checkFolderOrFileExistSync(this.filePath); //true
+        const isFileExist = checkFolderOrFileExistSync(this.filePath);
 
         if (!isFileExist) {
             this.helper.createCollectionFile();
             this.documents = [];
+            return;
         }
 
         this.documents = this.helper.getDocumentsFromFile();
-        
     }
 
     async deleteCollection() {
