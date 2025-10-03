@@ -12,11 +12,11 @@ export const HIVE_ROOT =
 
 export const PATHS = {
     allDatabesesFolder: path.join(HIVE_ROOT, "hives"),
-    hiveDBDataFolder: path.join(HIVE_ROOT, "data-folder"),
-    collectionsFolder: path.join(HIVE_ROOT, "data-folder", "collections"),
+    hiveDBDataFolder: path.join(HIVE_ROOT, "hivedb-metadata"),
+    collectionsFolder: path.join(HIVE_ROOT, "hivedb-metadata", "collections"),
     databaseInfoPath: path.join(
         HIVE_ROOT,
-        "data-folder",
+        "hivedb-metadata",
         "databases-info.json"
     ),
 };
