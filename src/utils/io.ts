@@ -6,7 +6,7 @@ export const handleFolderIO = async (
     callback: () => Promise<any> | any
 ) => {
     try {
-        return callback();
+        return await callback();
     } catch (error) {
         throw new HiveError(HiveErrorCode.ERR_FOLDER_IO, message, error);
     }
