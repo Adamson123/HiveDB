@@ -2,11 +2,11 @@
 
 Lightweight, file-based JSON database with typed schemas and simple CRUD.
 
--   ESM-first (TypeScript: module=NodeNext), explicit .js extensions in source.
--   Strongly-typed schemas and documents via generics.
--   Data stored under a single root (hives and metadata) controlled by PATHS.
+-   Data is stored under a single root folder (see PATHS) as JSON files per collection.
+-   ESM-first (TypeScript module=NodeNext), explicit .js extensions.
+-   Strongly-typed schemas and documents.
 
-Key files:
+Links to source:
 
 -   Core: [src/hiveDB.ts](c:\Users\Admin\Desktop\HiveDB\src\hiveDB.ts), [src/database/database.ts](c:\Users\Admin\Desktop\HiveDB\src\database\database.ts), [src/collection/collection.ts](c:\Users\Admin\Desktop\HiveDB\src\collection\collection.ts)
 -   Types: [src/types/index.ts](c:\Users\Admin\Desktop\HiveDB\src\types\index.ts)
@@ -17,25 +17,25 @@ Key files:
 
 ## Installation
 
-Build:
+Build the library:
 
--   npm install
--   npm run build
+-   Windows (VS Code terminal):
+    -   npm install
+    -   npm run build
 
 Use locally (recommended for development):
 
 -   In repo: npm run link:local
 -   In consumer project: npm link hivedb
 
-Install packed tarball globally (installs only dist):
+Install packed tarball globally (only dist is installed):
 
 -   In repo: npm run pack:global
 -   In consumer project: npm link hivedb
 
-Alternative (file dependency):
+Alternatively, use a file dependency in a consumer:
 
--   Add to consumer package.json: "hivedb": "file:C:/Users/Admin/Desktop/HiveDB"
--   npm install
+-   "dependencies": { "hivedb": "file:C:/Users/Admin/Desktop/HiveDB" }
 
 ## Quick start
 
@@ -56,78 +56,92 @@ const userSchema = HiveDB.createSchema({
 // Create a collection
 const users = db.createCollection("users", userSchema);
 
-// Create
+// Create a document
 const adam = await users.create({
     name: "Adam Ajibade",
-    password: "",
+    password: "secret",
     email: "adam@example.com",
 });
 
-// Read
+// Queries
 const found = await users.findById(adam._id);
 const one = await users.findOne({ name: "Adam Ajibade" });
 const many = await users.findMany({ email: "adam@example.com" });
 
-// Update
+// Updates
 await users.updateById(adam._id, { bio: "Hello!" });
 await users.updateOne({ name: "Adam Ajibade" }, { email: "new@mail.com" });
 await users.updateMany({ bio: undefined as any }, { bio: "N/A" });
 
-// Delete
+// Deletes
 await users.deleteOne({ email: "new@mail.com" });
 await users.deleteMany({ name: "Someone" });
 ```
 
-## API overview
+More complete example: [src/demo.ts](c:\Users\Admin\Desktop\HiveDB\src\demo.ts)
 
--   HiveDB ([src/hiveDB.ts](c:\Users\Admin\Desktop\HiveDB\src\hiveDB.ts))
-    -   createDatabase(name): Database
-    -   createSchema<S extends Schema>(schema: S): S
--   Database ([src/database/database.ts](c:\Users\Admin\Desktop\HiveDB\src\database\database.ts))
-    -   createCollection<S>(name, schema): Collection<S>
-    -   deleteCollection(name)
-    -   deleteDatabase()
--   Collection ([src/collection/collection.ts](c:\Users\Admin\Desktop\HiveDB\src\collection\collection.ts))
-    -   create(document)
-    -   findById(id), findOne(query), findMany(query?)
-    -   updateById(id, update), updateOne(query, update), updateMany(query, update)
-    -   deleteById(id), deleteOne(query), deleteMany(query)
-    -   deleteCollection()
+## How it works
 
-Types:
+-   Databases
 
--   Schema, FieldType<S>, Document<S> from [src/types/index.ts](c:\Users\Admin\Desktop\HiveDB\src\types\index.ts)
--   Errors via HiveError, HiveErrorCode in [src/errors.ts](c:\Users\Admin\Desktop\HiveDB\src\errors.ts)
+    -   Created via [`HiveDB.createDatabase`](c:\Users\Admin\Desktop\HiveDB\src\hiveDB.ts) and stored under PATHS.allDatabesesFolder as folders.
+    -   Each database persists its collections metadata in a per-db JSON file (e.g., data-folder/collections/<db>-collections.json).
+
+-   Collections
+
+    -   Created via [`Database.createCollection`](c:\Users\Admin\Desktop\HiveDB\src\database\database.ts). Each collection is a JSON file in the database folder.
+    -   Documents are kept in memory and persisted to disk on mutating operations.
+
+-   Types
+
+    -   Define schemas with [`HiveDB.createSchema`](c:\Users\Admin\Desktop\HiveDB\src\hiveDB.ts).
+    -   Available types: `Schema`, `FieldType<S>`, `Document<S>` from [src/types/index.ts](c:\Users\Admin\Desktop\HiveDB\src\types\index.ts).
+
+-   Errors
+
+    -   See [`HiveError`](c:\Users\Admin\Desktop\HiveDB\src\errors.ts) and [`HiveErrorCode`](c:\Users\Admin\Desktop\HiveDB\src\errors.ts).
+
+-   IO helpers
+
+    -   Folder/file safety wrappers in [src/utils/io.ts](c:\Users\Admin\Desktop\HiveDB\src\utils\io.ts).
+
+-   Runtime flow
+    -   See sequence diagram: [md/RuntimeFlow.md](c:\Users\Admin\Desktop\HiveDB\md\RuntimeFlow.md)
 
 ## Data root and paths
 
-Paths are centralized in [src/constants.ts](c:\Users\Admin\Desktop\HiveDB\src\constants.ts):
+All file paths are anchored to the package root by [src/constants.ts](c:\Users\Admin\Desktop\HiveDB\src\constants.ts):
 
 -   hives/ — per-database folders and collection JSON files
--   hivedb-metadata/databases-info.json — list of databases
--   hivedb-metadata/collections/<db>-collections.json — per-db collection metadata
+-   data-folder/databases-info.json — list of known databases
+-   data-folder/collections/<db>-collections.json — per-db collection metadata
 
 Override the root with an env var:
 
--   PowerShell: $env:HIVEDB_ROOT = "C:\Users\Admin\Desktop\HiveDB"
--   CMD: set HIVEDB_ROOT=C:\Users\Admin\Desktop\HiveDB
-
-By default, the root resolves to the package install directory.
+-   PowerShell (per session): `$env:HIVEDB_ROOT = "C:\Users\Admin\Desktop\HiveDB"`
+-   CMD (per session): `set HIVEDB_ROOT=C:\Users\Admin\Desktop\HiveDB`
 
 ## ESM and TypeScript
 
--   tsconfig: "module": "NodeNext", "moduleResolution": "NodeNext" ([tsconfig.json](c:\Users\Admin\Desktop\HiveDB\tsconfig.json))
--   All relative imports in src include .js extension so runtime ESM works after build.
--   Consumers should use ESM or a bundler.
+-   tsconfig uses `"module": "NodeNext"` and `"moduleResolution": "NodeNext"` ([tsconfig.json](c:\Users\Admin\Desktop\HiveDB\tsconfig.json)).
+-   All relative imports include the .js extension in source (TypeScript rewrites to .js in dist).
+-   Consumers should also be ESM or use a bundler.
 
 ## Development workflow
 
 -   One-time link:
-    -   In repo: npm run link:local (stages .publish/hivedb and runs npm link)
-    -   In consumer: npm link hivedb
--   Rebuild on changes:
-    -   Run: npx tsc -w -p tsconfig.json
-    -   The staged package links dist, so rebuilds reflect automatically.
+    -   In repo: `npm run link:local` (stages .publish/hivedb and runs `npm link`)
+    -   In consumer: `npm link hivedb`
+-   Live updates:
+    -   In repo: `npm run build:watch` (add this script) to recompile on change
+    -   The staged package symlinks dist, so rebuilds are reflected automatically.
+
+Helpful scripts:
+
+-   `build` — compile to dist
+-   `link:local` — stage minimal package and link globally ([scripts/stage-link.cjs](c:\Users\Admin\Desktop\HiveDB\scripts\stage-link.cjs))
+-   `pack:global` — pack and install the tarball globally (dist-only)
+-   `unlink:global` — remove global link
 
 ## Project structure
 
@@ -153,10 +167,9 @@ src/
   hiveDB.ts
   constants.ts
   index.ts
-hives/                      # data (per database)
-hivedb-metadata/            # metadata
-dist/                       # compiled output
-scripts/stage-link.cjs      # local link staging script
+hives/                     # data (per database)
+hivedb-metadata/               # metadata
+dist/                      # compiled output
 ```
 
 ## License
