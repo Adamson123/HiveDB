@@ -6,6 +6,7 @@ import path from "path";
 import { HiveError, HiveErrorCode } from "./errors.js";
 import { checkFolderOrFileExistSync } from "./utils/exist.js";
 import { fileURLToPath } from "url"; // ADD
+import { PATHS } from "./constants.js";
 
 // Resolve package root (dist -> package root at runtime), allow env override
 const __filename = fileURLToPath(import.meta.url);
@@ -18,13 +19,7 @@ const HIVE_ROOT =
 
 const HiveDB = {
     databases: [] as Database[],
-    allDatabesesFolder: path.join(HIVE_ROOT, "hives"),
-    hiveDB_data_folder: path.join(HIVE_ROOT, "data-folder"),
-    databaseInfoPath: path.join(
-        HIVE_ROOT,
-        "data-folder",
-        "databases-info.json"
-    ),
+
     processDatabasesName: new Set<string>(), // To avoid creating database twice in a process
 
     async saveDatabasesInfoToFile(name: string) {
@@ -40,21 +35,21 @@ const HiveDB = {
         await handleFileIO(
             `Error saving database info during "${name}" database operation`,
             async () => {
-                await fs.writeFile(this.databaseInfoPath, datasetsInfo);
+                await fs.writeFile(PATHS.databaseInfoPath, datasetsInfo);
             }
         );
     },
 
     createHivesFolder() {
         const isFolderExist = checkFolderOrFileExistSync(
-            HiveDB.allDatabesesFolder
+            PATHS.allDatabesesFolder
         );
         if (!isFolderExist)
             handleFolderIO(
                 `Error creating hiveDB hives folder during`,
 
                 async () => {
-                    fsSync.mkdirSync(HiveDB.allDatabesesFolder, {
+                    fsSync.mkdirSync(PATHS.allDatabesesFolder, {
                         recursive: true,
                     });
                 }
@@ -62,27 +57,27 @@ const HiveDB = {
     },
     loadDatabasesInfoFromFile() {
         const isFolderExist = checkFolderOrFileExistSync(
-            HiveDB.hiveDB_data_folder
+            PATHS.hiveDBDataFolder
         );
         if (!isFolderExist)
             handleFolderIO(
                 `Error creating hiveDB data folder during`,
                 async () => {
-                    fsSync.mkdirSync(HiveDB.hiveDB_data_folder, {
+                    fsSync.mkdirSync(PATHS.hiveDBDataFolder, {
                         recursive: true,
                     });
                     fsSync.mkdirSync(
-                        path.join(HiveDB.hiveDB_data_folder, "collections"),
+                        path.join(PATHS.hiveDBDataFolder, "collections"),
                         { recursive: true }
                     );
-                    fsSync.mkdirSync(HiveDB.allDatabesesFolder, {
+                    fsSync.mkdirSync(PATHS.allDatabesesFolder, {
                         recursive: true,
                     });
                 }
             );
 
-        if (fsSync.existsSync(this.databaseInfoPath)) {
-            const data = fsSync.readFileSync(this.databaseInfoPath, "utf8");
+        if (fsSync.existsSync(PATHS.databaseInfoPath)) {
+            const data = fsSync.readFileSync(PATHS.databaseInfoPath, "utf8");
             try {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed)) {
@@ -108,15 +103,16 @@ const HiveDB = {
         const newDatabase = new Database(name);
         newDatabase.init();
 
-        // Avoid creating database with same name in a process
-        if (this.databases.find((db) => db.name === name)) {
-            throw new Error(`Database with name "${name}" already exists.`);
+        // Check if the database already exists before adding it to the in-memory databases array.
+        // databases might already be loaded from disk; skip duplicates instead of creating them again.
+        // Do not throw here, createdatabase is also used to return an existing database.
+
+        if (!this.databases.find((db) => db.name === name)) {
+            this.databases.push(newDatabase);
+            this.processDatabasesName.add(name);
+
+            this.saveDatabasesInfoToFile(name);
         }
-
-        this.databases.push(newDatabase);
-        this.processDatabasesName.add(name);
-
-        this.saveDatabasesInfoToFile(name);
 
         return newDatabase;
     },

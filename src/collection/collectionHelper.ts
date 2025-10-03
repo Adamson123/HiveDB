@@ -16,7 +16,7 @@ export default class CollectionHelper<S extends Schema> {
         handleFileIO(
             `Error creating collection "${this.collection.name}"`,
             () => {
-                fsSync.writeFileSync(this.collection.filePath, "", {
+                fsSync.writeFileSync(this.collection.filePath, "[]", {
                     encoding: "utf8",
                 });
             }

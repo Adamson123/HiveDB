@@ -11,6 +11,7 @@ import { HiveError, HiveErrorCode } from "../errors.js";
 import { handleFolderIO } from "../utils/io.js";
 import DatabaseHelper from "./databaseHelper.js";
 import HiveDB from "../hiveDB.js";
+import { PATHS } from "../constants.js";
 
 export default class Database {
     name: string;
@@ -26,11 +27,11 @@ export default class Database {
         this.helper.validateDatabaseName(name);
         this.name = name;
         this.collectionsInfoPath = path.join(
-            HiveDB.hiveDB_data_folder,
+            PATHS.hiveDBDataFolder,
             "collections",
             this.name + "-collections.json"
         );
-        this.folderPath = path.join(HiveDB.allDatabesesFolder, this.name);
+        this.folderPath = path.join(PATHS.allDatabesesFolder, this.name);
     }
 
     async deleteDatabase() {
@@ -60,9 +61,11 @@ export default class Database {
 
         //Initialize collections from collectionsInfo
         if (collectionsInfo && collectionsInfo.length) {
-            this.collections = collectionsInfo.map(
-                (col: any) => new Collection(col.name, col.schema, this)
-            );
+            this.collections = collectionsInfo.map((col: any) => {
+                const c = new Collection(col.name, col.schema, this);
+                c.init(); // ensure documents are loaded
+                return c;
+            });
         }
     }
 
