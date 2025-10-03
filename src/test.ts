@@ -73,6 +73,21 @@ const categorySchema = HiveDB.createSchema({
 const categoryCol = db3.createCollection("categories", categorySchema);
 //TODO: Fix deleteCollection not deleting the collection file
 //await db3.deleteCollection("categories");
-const category = await categoryCol.create({ name: "Electronics" });
+const category = await categoryCol.create({
+    name: "data" + Math.floor(Math.random() * 1000),
+    // testExtraField: "rgtty",
+});
+
+await categoryCol.updateById(category._id, {
+    description:
+        "All kinds of electronic items" + Math.floor(Math.random() * 1000),
+});
+
+await categoryCol.updateOne({ name: "data483" }, { name: "Elnics😋😎🤣" });
+
+await categoryCol.updateMany(
+    { name: "Electronics🙁🙁😖🙁☹☹🧑🏾" },
+    { name: "Electronics🙁🙁😖🙁" }
+);
 
 console.log(category);

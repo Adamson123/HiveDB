@@ -1,29 +1,30 @@
-import CollectionHelper from "./collectionHelper.js";
+import Collection from "./collection.js";
 
 export default class CollectionFindMethods<S extends Schema> {
-    documents: Doc<S>[];
+    collection: Collection<S>;
 
-    constructor(documents: Doc<S>[]) {
-        this.documents = documents;
+    constructor(collection: Collection<S>) {
+        this.collection = collection;
     }
 
     async findById(_id: string): Promise<Doc<S> | undefined> {
-        return this.documents.find((doc) => doc._id === _id);
-    }
-
-    async find(query?: Partial<Doc<S>>): Promise<Doc<S>[]> {
-        if (!query || Object.keys(query).length === 0) return this.documents;
-
-        const keys = Object.keys(query);
-        return this.documents.filter((doc) =>
-            keys.every((key) => (doc as any)[key] === (query as any)[key])
-        );
+        return this.collection.documents.find((doc) => doc._id === _id);
     }
 
     async findOne(query: Partial<Doc<S>>): Promise<Doc<S>> {
         const keys = Object.keys(query);
-        return this.documents.find((doc) =>
+        return this.collection.documents.find((doc) =>
             keys.every((key) => (doc as any)[key] === (query as any)[key])
         ) as Doc<S>;
+    }
+
+    async findMany(query?: Partial<Doc<S>>): Promise<Doc<S>[]> {
+        if (!query || Object.keys(query).length === 0)
+            return this.collection.documents;
+
+        const keys = Object.keys(query);
+        return this.collection.documents.filter((doc) =>
+            keys.every((key) => (doc as any)[key] === (query as any)[key])
+        );
     }
 }

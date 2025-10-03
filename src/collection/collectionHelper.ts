@@ -62,7 +62,7 @@ export default class CollectionHelper<S extends Schema> {
         return true;
     };
 
-    validateFieldTypes = (document: FieldType<S>) => {
+    validateFieldTypes = (document: FieldType<S> | Partial<Doc<S>>) => {
         const keys = Object.keys(document);
 
         for (const key of keys) {
@@ -78,7 +78,7 @@ export default class CollectionHelper<S extends Schema> {
         }
     };
 
-    validateRequiredFields(document: FieldType<S>) {
+    validateRequiredFields(document: FieldType<S> | Partial<Doc<S>>) {
         const requiredSchemaKeys = Object.keys(this.collection.schema).filter(
             (key) => this.collection.schema[key].required
         );
@@ -101,5 +101,17 @@ export default class CollectionHelper<S extends Schema> {
                 `Collection name '${name}' is invalid.`
             );
         }
+    }
+
+    removeKeysNotDefinedInSchema(document: FieldType<S> | Partial<Doc<S>>) {
+        const schemaKeys = Object.keys(this.collection.schema);
+        const docKeys = Object.keys(document);
+
+        for (const key of docKeys) {
+            if (!schemaKeys.includes(key)) {
+                delete (document as any)[key];
+            }
+        }
+        return document;
     }
 }

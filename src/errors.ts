@@ -12,6 +12,7 @@ export enum HiveErrorCode {
     ERR_FOLDER_IO = "ERR_FOLDER_IO",
     ERR_FILE_IO = "ERR_FILE_IO",
     ERR_JSON_PARSE = "ERR_JSON_PARSE",
+    ERR_UNDEFINED_DOCUMENT = "ERR_UNDEFINED_DOCUMENT",
 }
 
 export class HiveError extends Error {

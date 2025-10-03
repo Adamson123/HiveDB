@@ -1,16 +1,19 @@
+import Collection from "./collection.js";
 import CollectionHelper from "./collectionHelper.js";
 
 export default class CollectionDeleteMethods<S extends Schema> {
-    documents: Doc<S>[];
+    collection: Collection<S>;
     helper: CollectionHelper<S>;
 
-    constructor(documents: Doc<S>[], helper: CollectionHelper<S>) {
-        this.documents = documents;
-        this.helper = helper;
+    constructor(collection: Collection<S>) {
+        this.collection = collection;
+        this.helper = collection.helper;
     }
 
     async deleteById(_id: string) {
-        this.documents = this.documents.filter((doc) => doc._id !== _id);
+        this.collection.documents = this.collection.documents.filter(
+            (doc) => doc._id !== _id
+        );
         await this.helper.saveDocumentsToFile();
     }
 
@@ -19,7 +22,7 @@ export default class CollectionDeleteMethods<S extends Schema> {
 
         const keys = Object.keys(query);
 
-        this.documents = this.documents.filter(
+        this.collection.documents = this.collection.documents.filter(
             (doc) =>
                 !keys.every((key) => (doc as any)[key] === (query as any)[key])
         );
@@ -33,11 +36,14 @@ export default class CollectionDeleteMethods<S extends Schema> {
 
         if (keys.length === 0) {
             // delete all
-            this.documents = [];
+            this.collection.documents = [];
         } else {
             // keep docs that DO NOT fully match the query
-            this.documents = this.documents.filter((doc) =>
-                keys.some((key) => (doc as any)[key] !== (query as any)[key])
+            this.collection.documents = this.collection.documents.filter(
+                (doc) =>
+                    keys.some(
+                        (key) => (doc as any)[key] !== (query as any)[key]
+                    )
             );
         }
         await this.helper.saveDocumentsToFile();
